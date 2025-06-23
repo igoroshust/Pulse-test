@@ -594,6 +594,27 @@
 <!--          .catch(error => console.error('Error:', error));-->
 <!--    </script>-->
 
+<!--    <script>-->
+<!--        fetch('http://localhost:8000/api/information')-->
+<!--        .then(response => response.json())-->
+<!--        .then(data => {-->
+<!--            const tableBody = document.querySelector('#datatablesSimple tbody');-->
+<!--            tableBody.innerHTML = '';-->
+
+<!--            data.forEach(item => {-->
+<!--                const row = document.createElement('tr');-->
+<!--                row.innerHTML = `-->
+<!--                    <td>${item.org_name}</td>-->
+<!--                    <td>${item.deep}</td>-->
+<!--                    <td>${item.average}</td>-->
+<!--                    <td>${item.active}</td>-->
+<!--                    `;-->
+<!--                tableBody.appendChild(row);-->
+<!--            });-->
+<!--        })-->
+<!--        .catch(error => console.error('Errors:', error));-->
+<!--    </script>-->
+
     <script>
         fetch('http://localhost:8000/api/information')
         .then(response => response.json())
@@ -602,17 +623,17 @@
             tableBody.innerHTML = '';
 
             data.forEach(item => {
-                const row = document.createElement('tr');
+                row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${item.org_name}</td>
                     <td>${item.deep}</td>
                     <td>${item.average}</td>
                     <td>${item.active}</td>
-                    `;
+                `;
                 tableBody.appendChild(row);
             });
         })
-        .catch(error => console.error('Errors:', error));
+        .catch(error => console.error('Errors: ', error));
     </script>
 
     </body>

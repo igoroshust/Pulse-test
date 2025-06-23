@@ -6,6 +6,7 @@
 4. Выполнить команды в консоле:
 5. python -m venv venv
 6. venv\scripts\activate
+7. pip install -r requirements.txt
 7. cd backend
 8. python manage.py runserver (запуск сервера)
 

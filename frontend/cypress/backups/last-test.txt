@@ -1,0 +1,88 @@
+// Функция для генерации случайного имени
+function getRandomName() {
+  const firstNames = ['Александр', 'Дмитрий', 'Сергей', 'Иван', 'Павел'];
+  const lastNames = ['Иванов', 'Петров', 'Сидоров', 'Кузнецов', 'Смирнов'];
+  const middleName = 'Тестович';
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  return `${lastName} ${firstName} ${middleName}`;
+}
+
+// Функция для генерации случайного номера телефона
+function getRandomPhone() {
+  let phone = '9'; // Начинаем с 9 для мобильного номера
+  for (let i = 0; i < 9; i++) {
+    phone += Math.floor(Math.random() * 10); // Добавляем случайные цифры от 0 до 9
+  }
+  return phone;
+}
+
+// Функция для генерации случайного email
+function getRandomEmail() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  const randomString = () => {
+    return Array.from({ length: 2 }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+  };
+  return `${randomString()}@${randomString()}.${randomString()}`;
+}
+
+let executionCount = 0; // Переменная для отслеживания количества запусков
+const maxExecutions = 5; // Максимальное количество запусков
+
+function runTest() {
+  describe('Заполнение формы на стороннем сервисе', () => {
+    beforeEach(() => {
+      Cypress.on('uncaught:exception', (err, runnable) => {
+        return false; // Игнорировать ошибки
+      });
+    });
+
+    it('должен авторизоваться через интерфейс и заполнить данные в форме', () => {
+      // Переход на страницу входа
+      cy.visit('https://mfc-eq.loc/arm/login');
+      // Вводим учетные данные
+      cy.get('input[name="login"]').type('AutomationTesting');
+      cy.get('input[name="password"]').type('mfc-0202testing');
+      cy.get('.btn.btn-primary').click();
+      // Выбор офиса обслуживания
+      cy.get('.select2-chosen').click();
+      cy.get('.select2-result-label').click();
+      cy.get('.btn.btn-primary').click();
+      // Переход во вкладку "Предварительная запись"
+      cy.get('a[title="Пред. запись"]').click({ force: true });
+      cy.get('.btn.btn-success').click();
+      // Выбор услуги
+      cy.get('.service-group.ng-scope').eq(0).click({ force: true });
+      cy.get('.ng-binding').eq(18).click({ force: true });
+      cy.get('.btn.btn-primary.ng-scope').click({ force: true });
+
+      // Выбор даты
+      cy.get('.k-in-month.k-active').eq(Math.floor(Math.random() * 30)).click();
+      cy.wait(2000);
+      cy.get('.select2-chosen').eq(0).click();
+      cy.get('.select2-results-dept-0.select2-result.select2-result-selectable').eq(Math.floor(Math.random() * 35)).click();
+      cy.get('.btn.btn-primary').eq(3).click({ force: true });
+
+      // Основная информация
+      cy.get('form input[name="talonFio"]').type(getRandomName());
+      cy.get('form input[name="talonPhone"]').type(getRandomPhone());
+      cy.get('form input[name="talonEmail"]').type(getRandomEmail());
+      cy.get('.style-scope.paper-radio-button').eq(11).click();
+      cy.get('.btn.btn-primary').eq(7).click();
+
+      // Увеличиваем счетчик исполнений
+      executionCount++;
+
+      // Проверяем, достигли ли мы максимального количества запусков
+      if (executionCount < maxExecutions) {
+        // Запускаем тест снова через 5 секунд
+        setTimeout(() => {
+          runTest();
+        }, 5000);
+      }
+    });
+  });
+}
+
+// Запускаем тест
+runTest();

@@ -19,3 +19,11 @@
 5. npm start
 6. Перейти по ссылке из консоли (пример: http://localhost:3000)
 
+#### Запуск тестов 
+асинхронное создание талонов
+
+1. cd frontend
+2. node run-tests.js
+
+cypress
+1. npx cypress open

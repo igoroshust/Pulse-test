@@ -13,8 +13,15 @@ class Information(models.Model):
         verbose_name = 'Информация'
         verbose_name_plural = 'Информация'
 
-# class Windows(models.Model):
-#     organization_id = models.OneToOneField(Organizations, on_delete=models.CASCADE)
-#     deep = models.IntegerField(verbose_name='Глубина окна')
-#     average = models.IntegerField(verbose_name='Среднее время ожидания по талону')
-#     active = models.BooleanField(verbose_name='Активность окна')
+class Test(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    someint = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        verbose_name = 'Тест'
+        verbose_name_plural = 'Тест'
+        db_table = 'test'

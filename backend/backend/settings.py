@@ -90,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'def': {
+    'test': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': r'C:\Users\Oshust\projects\Pulse-test\backend\test.db',
     }

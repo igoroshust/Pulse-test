@@ -7,6 +7,12 @@ from api import views
 
 router = routers.DefaultRouter()
 router.register(r'information', views.InformationViewSet)
+router.register(r'work_time', views.WorkTimeViewSet)
+router.register(r'window', views.WindowViewSet)
+router.register(r'talon', views.TalonViewSet)
+router.register(r'department', views.DepartmentViewSet)
+router.register(r'unit', views.UnitViewSet)
+router.register(r'work_time_range', views.WorkTimeRangeViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

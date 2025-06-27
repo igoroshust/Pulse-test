@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6e0fe240-8681-4562-9953-5c9b732976be" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/dashboard/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dashboard/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/dashboard/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dashboard/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/backend/db.sqlite3" afterDir="false" />
-    </list>
+    <list default="true" id="6e0fe240-8681-4562-9953-5c9b732976be" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

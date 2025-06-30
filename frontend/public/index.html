@@ -7,7 +7,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
 
-        <title>Pulse</title>
+        <title>test</title>
 
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="./css/styles.css" rel="stylesheet" />
@@ -573,73 +573,29 @@
             </div>
         </div>
 
-<!--    <script>-->
-<!--          fetch('http://localhost:8000/api/information/')-->
-<!--          .then(response => response.json())-->
-<!--          .then(data => {-->
-<!--                const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--                tableBody.innerHTML = ''; // Очистка таблицы перед добавлением новых данных-->
-
-<!--                data.forEach(item => {-->
-<!--                    const row = document.createElement('tr');-->
-<!--                    row.innerHTML = `-->
-<!--                        <td>${item.org_name}</td>-->
-<!--                        <td>${item.deep}</td>-->
-<!--                        <td>${item.average}</td>-->
-<!--                        <td>${item.active}</td>-->
-<!--                    `;-->
-<!--                    tableBody.appendChild(row);-->
-<!--                });-->
-<!--          })-->
-<!--          .catch(error => console.error('Error:', error));-->
-<!--    </script>-->
-
-<!--    <script>-->
-<!--        fetch('http://localhost:8000/api/information')-->
-<!--        .then(response => response.json())-->
-<!--        .then(data => {-->
-<!--            const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--            tableBody.innerHTML = '';-->
-
-<!--            data.forEach(item => {-->
-<!--                const row = document.createElement('tr');-->
-<!--                row.innerHTML = `-->
-<!--                    <td>${item.org_name}</td>-->
-<!--                    <td>${item.deep}</td>-->
-<!--                    <td>${item.average}</td>-->
-<!--                    <td>${item.active}</td>-->
-<!--                    `;-->
-<!--                tableBody.appendChild(row);-->
-<!--            });-->
-<!--        })-->
-<!--        .catch(error => console.error('Errors:', error));-->
-<!--    </script>-->
-
-    <script>
-        fetch('http://localhost:8000/api/information')
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector('#datatablesSimple tbody');
-            tableBody.innerHTML = '';
-
-            data.forEach(item => {
-                row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.org_name}</td>
-                    <td>${item.deep}</td>
-                    <td>${item.average}</td>
-                    <td>${item.active}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error('Errors: ', error));
-    </script>
 
 
-    <script>
-        fetch('http://localhost:8000/test/').then(response => response.json()).then(data => console.log(data));
-    </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatSocket = new WebSocket('ws://localhost:8080/ws/test/');
+
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket-соединение установлено');
+
+            // Отправляем сообщение на сервер о готовности получить данные через S
+            chatSocket.send(JSON.stringify({'action': 'get_data'}));
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log('Полученные данные:', data);
+        };
+        chatSocket.onclose = function(e) {
+            console.log('WebSocket-соединение закрыто');
+        };
+    });
+</script>
+
 
     </body>
 </html>

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'channels',
     'corsheaders',
     'dashboard',
     'rest_framework',
@@ -90,10 +91,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'test': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'test.db',
-    }
+    # 'test': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'test.db',
+    # }
 }
 
 
@@ -151,3 +152,16 @@ CORS_ALLOW_ALL_ORIGINS = True
 #     'http://localhost:3000',
 # ]
 
+
+# WebSockets
+ASGI_APPLICATION = 'backend.asgi.application'
+
+# Настройка канала
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)]
+        },
+    },
+}

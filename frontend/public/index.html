@@ -7,7 +7,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
 
-        <title>Pulse</title>
+        <title>test</title>
 
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="./css/styles.css" rel="stylesheet" />
@@ -573,57 +573,28 @@
             </div>
         </div>
 
-<!--    <script>-->
-<!--          fetch('http://localhost:8000/api/information/')-->
-<!--          .then(response => response.json())-->
-<!--          .then(data => {-->
-<!--                const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--                tableBody.innerHTML = ''; // Очистка таблицы перед добавлением новых данных-->
 
-<!--                data.forEach(item => {-->
-<!--                    const row = document.createElement('tr');-->
-<!--                    row.innerHTML = `-->
-<!--                        <td>${item.org_name}</td>-->
-<!--                        <td>${item.deep}</td>-->
-<!--                        <td>${item.average}</td>-->
-<!--                        <td>${item.active}</td>-->
-<!--                    `;-->
-<!--                    tableBody.appendChild(row);-->
-<!--                });-->
-<!--          })-->
-<!--          .catch(error => console.error('Error:', error));-->
-<!--    </script>-->
 
-<!--    <script>-->
-<!--        fetch('http://localhost:8000/api/information')-->
-<!--        .then(response => response.json())-->
-<!--        .then(data => {-->
-<!--            const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--            tableBody.innerHTML = '';-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatSocket = new WebSocket('ws://127.0.0.1:5000/ws/information-updates/');
 
-<!--            data.forEach(item => {-->
-<!--                const row = document.createElement('tr');-->
-<!--                row.innerHTML = `-->
-<!--                    <td>${item.org_name}</td>-->
-<!--                    <td>${item.deep}</td>-->
-<!--                    <td>${item.average}</td>-->
-<!--                    <td>${item.active}</td>-->
-<!--                    `;-->
-<!--                tableBody.appendChild(row);-->
-<!--            });-->
-<!--        })-->
-<!--        .catch(error => console.error('Errors:', error));-->
-<!--    </script>-->
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket-соединение установлено');
 
-    <script>
-        fetch('http://localhost:8000/api/information')
-        .then(response => response.json())
-        .then(data => {
+            // Отправляем сообщение на сервер о готовности получить данные через S
+            chatSocket.send(JSON.stringify({'action': 'get_data'}));
+        };
+
+        chatSocket.onmessage = function(e) {
+            data = JSON.parse(e.data);
+            console.log('Полученные данные: ', data);
+
             const tableBody = document.querySelector('#datatablesSimple tbody');
-            tableBody.innerHTML = '';
+            tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
 
-            data.forEach(item => {
-                row = document.createElement('tr');
+            data.data.forEach(item => {
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${item.org_name}</td>
                     <td>${item.deep}</td>
@@ -632,9 +603,20 @@
                 `;
                 tableBody.appendChild(row);
             });
-        })
-        .catch(error => console.error('Errors: ', error));
-    </script>
+        };
+
+        chatSocket.onclose = function(e) {
+            console.log('WebSocket-соединение закрыто');
+        };
+
+        // Периодически запрашиваем обновления данных
+<!--        setInterval(() => {-->
+<!--            chatSocket.send(JSON.stringify({'action': 'update_data'}));-->
+<!--        }, 5000); // Запрашиваем обновления каждые 5 секунд-->
+
+    });
+</script>
+
 
     </body>
 </html>

@@ -1,14 +1,16 @@
 from channels.generic.websocket import AsyncWebsocketConsumer # Асинхронный WS-потребитель
 from channels.db import database_sync_to_async
 import json
+import asyncio
 
 
 class TestConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """Установка соединения"""
-        await self.accept() # Принятие соединения
         # Добавляем текущее соединение в группу "information_updates"
         await self.channel_layer.group_add("information_updates", self.channel_name)
+        await self.accept() # Принятие соединения
+
 
     async def disconnect(self, close_code):
         """Разрыв соединения"""
@@ -33,4 +35,3 @@ class TestConsumer(AsyncWebsocketConsumer):
         print("Полученные данные:", text_data)
         data = await self.get_data()
         await self.send(text_data=json.dumps({'data': list(data)}))
-

@@ -4,6 +4,7 @@ from channels.layers import get_channel_layer # Получаем слои кан
 from channels.db import database_sync_to_async # Асинхронный доступ к БД
 from .models import Information
 import asyncio
+import json
 
 @receiver(post_save, sender=Information) # Связываем функцию с сигналом для Information
 def send_information_update(sender, instance, created, **kwargs):

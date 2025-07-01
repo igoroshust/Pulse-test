@@ -574,10 +574,9 @@
         </div>
 
 
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const chatSocket = new WebSocket('ws://127.0.0.1:5000/ws/information-updates/');
+        const chatSocket = new WebSocket('ws://localhost:8080/ws/information_updates/');
 
         chatSocket.onopen = function(e) {
             console.log('WebSocket-соединение установлено');
@@ -616,7 +615,6 @@
 
     });
 </script>
-
 
     </body>
 </html>

@@ -13,10 +13,11 @@ router.register(r'talon', views.TalonViewSet)
 router.register(r'department', views.DepartmentViewSet)
 router.register(r'unit', views.UnitViewSet)
 router.register(r'work_time_range', views.WorkTimeRangeViewSet)
+router.register(r'test', views.TestViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('test/', get_test_data, name='get_test_data'),
+    # path('test/', get_test_data, name='get_test_data'),
 ]

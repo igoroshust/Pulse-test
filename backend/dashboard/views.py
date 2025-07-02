@@ -15,7 +15,7 @@ def get_test_data(request):
             for row in data:
                 # Создаём словарь для сохранения
                 data_dict = {columns[i]: row[i] for i in range(len(columns))}
-                # Создаём объект TestData  сохраняем его
+                # Создаём объект TestData и сохраняем его
                 Test.objects.create(**data_dict)
 
             return JsonResponse({'data': data}, safe=False)

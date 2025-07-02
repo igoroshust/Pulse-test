@@ -574,47 +574,94 @@
         </div>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const chatSocket = new WebSocket('ws://localhost:8080/ws/information_updates/');
+<!--<script>-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        const chatSocket = new WebSocket('ws://localhost:8080/ws/information_updates/');-->
 
-        chatSocket.onopen = function(e) {
-            console.log('WebSocket-соединение установлено');
+<!--        chatSocket.onopen = function(e) {-->
+<!--            console.log('WebSocket-соединение установлено');-->
 
-            // Отправляем сообщение на сервер о готовности получить данные через S
-            chatSocket.send(JSON.stringify({'action': 'get_data'}));
-        };
+<!--            // Отправляем сообщение на сервер о готовности получить данные через S-->
+<!--            chatSocket.send(JSON.stringify({'action': 'get_data'}));-->
+<!--        };-->
 
-        chatSocket.onmessage = function(e) {
-            data = JSON.parse(e.data);
-            console.log('Полученные данные: ', data);
+<!--        chatSocket.onmessage = function(e) {-->
+<!--            data = JSON.parse(e.data);-->
+<!--            console.log('Полученные данные: ', data);-->
 
-            const tableBody = document.querySelector('#datatablesSimple tbody');
-            tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
+<!--            const tableBody = document.querySelector('#datatablesSimple tbody');-->
+<!--            tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных-->
 
-            data.data.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.org_name}</td>
-                    <td>${item.deep}</td>
-                    <td>${item.average}</td>
-                    <td>${item.active}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        };
+<!--            data.data.forEach(item => {-->
+<!--                const row = document.createElement('tr');-->
+<!--                row.innerHTML = `-->
+<!--                    <td>${item.org_name}</td>-->
+<!--                    <td>${item.deep}</td>-->
+<!--                    <td>${item.average}</td>-->
+<!--                    <td>${item.active}</td>-->
+<!--                `;-->
+<!--                tableBody.appendChild(row);-->
+<!--            });-->
+<!--        };-->
 
-        chatSocket.onclose = function(e) {
-            console.log('WebSocket-соединение закрыто');
-        };
+<!--        chatSocket.onclose = function(e) {-->
+<!--            console.log('WebSocket-соединение закрыто');-->
+<!--        };-->
 
-        // Периодически запрашиваем обновления данных
-<!--        setInterval(() => {-->
-<!--            chatSocket.send(JSON.stringify({'action': 'update_data'}));-->
-<!--        }, 5000); // Запрашиваем обновления каждые 5 секунд-->
+<!--        // Периодически запрашиваем обновления данных-->
+<!--&lt;!&ndash;        setInterval(() => {&ndash;&gt;-->
+<!--&lt;!&ndash;            chatSocket.send(JSON.stringify({'action': 'update_data'}));&ndash;&gt;-->
+<!--&lt;!&ndash;        }, 5000); // Запрашиваем обновления каждые 5 секунд&ndash;&gt;-->
 
-    });
-</script>
+<!--    });-->
+<!--</script>-->
+
+    <script>
+<!--        fetch('http://localhost:8000/api/information')-->
+<!--        .then(response => response.json())-->
+<!--        .then(data => {-->
+<!--            const tableBody = document.querySelector('#datatablesSimple tbody');-->
+<!--            tableBody.innerHTML = '';-->
+
+<!--            data.forEach(item => {-->
+<!--                row = document.createElement('tr');-->
+<!--                row.innerHTML = `-->
+<!--                    <td>${item.org_name}</td>-->
+<!--                    <td>${item.deep}</td>-->
+<!--                    <td>${item.average}</td>-->
+<!--                    <td>${item.active}</td>-->
+<!--                `;-->
+<!--                tableBody.appendChild(row);-->
+<!--            });-->
+<!--        })-->
+<!--        .catch(error => console.error('Errors: ', error));-->
+
+<!--        fetch('http://localhost:8000/test/').then(response => response.json()).then(data => console.log(data));-->
+
+
+
+            fetch('http://localhost:8000/api/test/')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector('#datatablesSimple tbody');
+                tableBody.innerHTML = '';
+
+                data.forEach(item => {
+                    row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.title}</td>
+                        <td>${item.description}</td>
+                        <td>${item.someint}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Errors: ', error));
+
+
+
+    </script>
+
 
     </body>
 </html>

@@ -8,6 +8,13 @@ class InformationSerializer(serializers.HyperlinkedModelSerializer):
         model = Information
         fields = ['org_name', 'deep', 'average', 'active',]
 
+class TestSerializer(serializers.HyperlinkedModelSerializer):
+    """Модель Тест"""
+
+    class Meta:
+        model = Test
+        fields = '__all__'
+
 class WorkTimeSerializer(serializers.HyperlinkedModelSerializer):
     """Модель Рабочее время"""
 
@@ -38,7 +45,6 @@ class DepartmentSerializer(serializers.HyperlinkedModelSerializer):
 
 class UnitSerializer(serializers.HyperlinkedModelSerializer):
     """Модель офисы"""
-
     class Meta:
         model = Unit
         fields = '__all__'

@@ -53,6 +53,7 @@ class TestViewSet(viewsets.ModelViewSet):
                 cursor.execute("""SELECT * FROM test""")
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
+
                 # Сохраняем данные в базу default
                 Test.objects.all().delete()  # Очистим таблицу перед добавлением новых данных
                 for row in data:

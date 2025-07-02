@@ -638,23 +638,28 @@
 
 <!--        fetch('http://localhost:8000/test/').then(response => response.json()).then(data => console.log(data));-->
 
-        fetch('http://localhost:8000/api/test/')
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector('#datatablesSimple tbody');
-            tableBody.innerHTML = '';
 
-            data.forEach(item => {
-                row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.title}</td>
-                    <td>${item.description}</td>
-                    <td>${item.someint}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error('Errors: ', error));
+
+            fetch('http://localhost:8000/api/test/')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector('#datatablesSimple tbody');
+                tableBody.innerHTML = '';
+
+                data.forEach(item => {
+                    row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.title}</td>
+                        <td>${item.description}</td>
+                        <td>${item.someint}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Errors: ', error));
+
+
+
     </script>
 
 

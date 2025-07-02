@@ -8,8 +8,8 @@ class TestConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """Установка соединения"""
         # Добавляем текущее соединение в группу "information_updates"
-        await self.channel_layer.group_add("information_updates", self.channel_name)
         await self.accept() # Принятие соединения
+        await self.channel_layer.group_add("information_updates", self.channel_name)
 
 
     async def disconnect(self, close_code):

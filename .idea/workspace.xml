@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6e0fe240-8681-4562-9953-5c9b732976be" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/api/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/backend/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/test.db" beforeDir="false" afterPath="$PROJECT_DIR$/backend/test.db" afterDir="false" />
     </list>
@@ -45,7 +44,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "save-test-data",
-    "last_opened_file_path": "C:/Users/Oshust/applications/Pulse-test",
+    "last_opened_file_path": "C:/Users/Oshust/applications/Pulse-test/frontend/public",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie"
   }
 }]]></component>
@@ -59,6 +58,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Oshust\applications\Pulse-test\frontend\public" />
       <recent name="C:\Pulse-test\frontend\public\css" />
       <recent name="C:\Pulse\frontend\src" />
       <recent name="C:\Pulse\frontend\public" />

@@ -115,9 +115,14 @@
             <main>
                 <div class="container-fluid px-4">
                     <h1 class="mt-4">Тестовый стенд</h1>
+                    <br>
+
+                    <h5 class="mt-6">Филиал: МФЦ Кыра</h5>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Статистика</li>
+                        <li class="breadcrumb-item active">Дата: 04.07.2025</li>
+                        <li class="breadcrumb-item active">Диапазон: 09:00 - 10:00</li>
                     </ol>
+
                     <div class="row">
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-primary text-white mb-4">
@@ -139,7 +144,7 @@
                         </div>
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-danger text-white mb-4" id="activeSessionsCard">
-                                <div class="card-body">Действующие окна</div>
+                                <div class="card-body">Среднее время ожидания</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">30</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
@@ -148,7 +153,43 @@
                         </div>
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-success text-white mb-4">
-                                <div class="card-body">Ожидание по талону</div>
+                                <div class="card-body">Окна по ПЗ</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-success text-white mb-4">
+                                <div class="card-body">Талоны ПЗ</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-danger text-white mb-4" id="activeWindowsCard-1">
+                                <div class="card-body">Талоны ЖЗ</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-warning text-white mb-4" id="activeSessionsCard-1">
+                                <div class="card-body">Отменённые талоны</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-primary text-white mb-4">
+                                <div class="card-body">Сброшенные талоны</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">30</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
@@ -165,38 +206,46 @@
                             <table id="datatablesSimple">
                                 <thead>
                                     <tr>
-                                        <th>Филиал</th>
-                                        <th>Активные окна</th>
-                                        <th>Действующие окна</th>
-                                        <th>Неактивные окна</th>
-                                        <th>Глубина записи по талону</th>
-                                        <th>Среднее время ожидания</th>
+                                        <th>Окно</th>
+                                        <th>Оператор</th>
+                                        <th>Активность окна</th>
+                                        <th>Фактическая активность окна</th>
+                                        <th>Обслужено талонов</th>
+                                        <th>Пауза</th>
                                     </tr>
                                 </thead>
-                                <tfoot>
-                                    <tr>
-                                        <th>Всего</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                </tfoot>
                                 <tbody>
                                     <tr>
-                                        <td>МФЦ "Кыра"</td>
-                                        <td>10</td>
-                                        <td>7</td>
-                                        <td>8</td>
-                                        <td>12 минут</td>
-                                        <td>10 минут</td>
+                                        <td>№1</td>
+                                        <td>Холмогорова</td>
+                                        <td>40 минут</td>
+                                        <td>20 минут</td>
+                                        <td>5</td>
+                                        <td>5 минут</td>
                                     </tr>
                                     <tr>
-                                        <td>МФЦ "Чара"</td>
-                                        <td>8</td>
-                                        <td>3</td>
-                                        <td>5</td>
-                                        <td>8 минут</td>
-                                        <td>14 минут</td>
+                                        <td>№2</td>
+                                        <td>Патрина</td>
+                                        <td>40 минут</td>
+                                        <td>25 минут</td>
+                                        <td>10</td>
+                                        <td>0 минут</td>
+                                    </tr>
+                                    <tr>
+                                        <td>№3</td>
+                                        <td>Казанцева</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <th><b>Всего</b></th>
+                                        <th></th>
+                                        <th><b><i>80 минут</i></b></th>
+                                        <th><b><i>45 минут</i></b></th>
+                                        <th><b><i>15 минут</i></b></th>
+                                        <th><b><i>5</i></b></th>
                                     </tr>
                                 </tbody>
                             </table>

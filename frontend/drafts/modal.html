@@ -165,38 +165,32 @@
                             <table id="datatablesSimple">
                                 <thead>
                                     <tr>
-                                        <th>Филиал</th>
+                                        <th>Название филиала</th>
+                                        <th>Глубина записи</th>
+                                        <th>Ожидание по талону</th>
                                         <th>Активные окна</th>
-                                        <th>Действующие окна</th>
-                                        <th>Неактивные окна</th>
-                                        <th>Глубина записи по талону</th>
-                                        <th>Среднее время ожидания</th>
                                     </tr>
                                 </thead>
                                 <tfoot>
                                     <tr>
-                                        <th>Всего</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
+                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Office</th>
+                                        <th>Age</th>
                                     </tr>
                                 </tfoot>
                                 <tbody>
                                     <tr>
-                                        <td>МФЦ "Кыра"</td>
+                                        <td class="branch-name" data-bs-toggle="modal" data-bs-target="#dataModal">Филиал 1</td>
                                         <td>10</td>
-                                        <td>7</td>
-                                        <td>8</td>
-                                        <td>12 минут</td>
-                                        <td>10 минут</td>
+                                        <td>5</td>
+                                        <td>3</td>
                                     </tr>
                                     <tr>
-                                        <td>МФЦ "Чара"</td>
-                                        <td>8</td>
-                                        <td>3</td>
+                                        <td class="branch-name" data-bs-toggle="modal" data-bs-target="#dataModal">Филиал 2</td>
+                                        <td>20</td>
+                                        <td>10</td>
                                         <td>5</td>
-                                        <td>8 минут</td>
-                                        <td>14 минут</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -221,29 +215,51 @@
 
     <!-- Модальное окно -->
     <div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="dataModalLabel">Данные</h5>
+                    <h5 class="modal-title" id="dataModalLabel">Выбор даты и диапазона</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Окно</th>
-                                <th>Оператор</th>
-                                <th>Филиал</th>
-                                <th>Текущий статус</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modalTableBody">
-                            <!-- Данные будут добавлены здесь через JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <div class="mb-3">
+                        <label for="datePicker" class="form-label">Выберите дату:</label>
+                        <input type="date" class="form-control" id="datePicker">
+                    </div>
+                    <div class="mb-3">
+                        <label for="rangeSelect" class="form-label">Выберите диапазон:</label>
+                        <select class="form-select" id="rangeSelect">
+                            <option value="" disabled selected>Выберите диапазон</option>
+                            <option value="1">Диапазон 1</option>
+                            <option value="2">Диапазон 2</option>
+                            <option value="3">Диапазон 3</option>
+                        </select>
+                    </div>
+                    <button id="applyButton" class="btn btn-primary" disabled>Применить</button>
+                    <div class="mt-3" id="dataTableContainer" style="display: none;">
+                        <table class="table mt-3">
+                            <thead>
+                                <tr>
+                                    <th>Окно</th>
+                                    <th>Оператор</th>
+                                    <th>Активность окна</th>
+                                    <th>Фактическая активность</th>
+                                    <th>Обслужено талонов</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalTableBody">
+                                <!-- Данные будут добавлены здесь через JavaScript -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2">Всего</td>
+                                    <td id="totalWindowActivity">0</td>
+                                    <td id="totalActualActivity">0</td>
+                                    <td id="totalServedTickets">0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -251,19 +267,27 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const datePicker = document.getElementById('datePicker');
+            const rangeSelect = document.getElementById('rangeSelect');
+            const applyButton = document.getElementById('applyButton');
+            const dataTableContainer = document.getElementById('dataTableContainer');
+            const modalTableBody = document.getElementById('modalTableBody');
+
             // Обработчик клика для карточки "Активные окна"
             document.getElementById('activeWindowsCard').addEventListener('click', function() {
                 openModal([
-                    { window: 1, operator: 'Холмогорова', branch: 'МФЦ “Кыра”', status: 'Нет на месте' },
-                    { window: 2, operator: 'Патрина', branch: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
+                    { window: '№1', operator: 'Холмогорова', windowActivity: '40 минут', actualActivity: '20 минут', servedTickets: 5 },
+                    { window: '№2', operator: 'Патрина', windowActivity: '40 минут', actualActivity: '25 минут', servedTickets: 10 },
+                    { window: '№3', operator: 'Казанцева', windowActivity: '0', actualActivity: '0', servedTickets: 0 }
                 ]);
             });
 
             // Обработчик клика для карточки "Действующие окна"
             document.getElementById('activeSessionsCard').addEventListener('click', function() {
                 openModal([
-                    { window: 1, operator: 'Холмогорова', branch: 'МФЦ “Кыра”', status: 'Обслуживает' },
-                    { window: 2, operator: 'Патрина', branch: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
+                    { window: '№1', operator: 'Холмогорова', windowActivity: '40 минут', actualActivity: '20 минут', servedTickets: 5 },
+                    { window: '№2', operator: 'Патрина', windowActivity: '40 минут', actualActivity: '25 минут', servedTickets: 10 },
+                    { window: '№3', operator: 'Казанцева', windowActivity: '0', actualActivity: '0', servedTickets: 0 }
                 ]);
             });
 
@@ -276,8 +300,9 @@
                     row.innerHTML = `
                         <td>${item.window}</td>
                         <td>${item.operator}</td>
-                        <td>${item.branch}</td>
-                        <td>${item.status}</td>
+                        <td>${item.windowActivity}</td>
+                        <td>${item.actualActivity}</td>
+                        <td>${item.servedTickets}</td>
                     `;
                     modalTableBody.appendChild(row);
                 });
@@ -287,26 +312,78 @@
                 modal.show();
             }
 
-            // Ваш прежний код для WebSocket или fetch
+            // Обработчик изменения для выбора даты и диапазона
+            datePicker.addEventListener('change', checkButtonState);
+            rangeSelect.addEventListener('change', checkButtonState);
+
+            function checkButtonState() {
+                if (datePicker.value && rangeSelect.value) {
+                    applyButton.disabled = false;
+                } else {
+                    applyButton.disabled = true;
+                }
+            }
+
+            // Обработчик клика на кнопку "Применить"
+            applyButton.addEventListener('click', function() {
+                // Здесь можно добавить логику для получения данных на основе выбранной даты и диапазона
+                const data = [
+                    { window: '№1', operator: 'Холмогорова', windowActivity: '40 минут', actualActivity: '20 минут', servedTickets: 5 },
+                    { window: '№2', operator: 'Патрина', windowActivity: '40 минут', actualActivity: '25 минут', servedTickets: 10 },
+                    { window: '№3', operator: 'Казанцева', windowActivity: '0', actualActivity: '0', servedTickets: 0 }
+                ];
+
+                // Очищаем предыдущие данные
+                modalTableBody.innerHTML = '';
+                let totalWindowActivity = 0;
+                let totalActualActivity = 0;
+                let totalServedTickets = 0;
+
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.window}</td>
+                        <td>${item.operator}</td>
+                        <td>${item.windowActivity}</td>
+                        <td>${item.actualActivity}</td>
+                        <td>${item.servedTickets}</td>
+                    `;
+                    modalTableBody.appendChild(row);
+
+                    // Суммируем значения для итогов
+                    totalWindowActivity += parseInt(item.windowActivity) || 0;
+                    totalActualActivity += parseInt(item.actualActivity) || 0;
+                    totalServedTickets += item.servedTickets;
+                });
+                // Обновляем итоги
+                document.getElementById('totalWindowActivity').innerText = totalWindowActivity + ' минут';
+                document.getElementById('totalActualActivity').innerText = totalActualActivity + ' минут';
+                document.getElementById('totalServedTickets').innerText = totalServedTickets;
+                // Показываем таблицу с данными
+                dataTableContainer.style.display = 'block';
+            });
+
+            // Функция для получения данных из API
             function fetchData() {
                 fetch('http://localhost:8000/api/test/')
                     .then(response => response.json())
                     .then(data => {
-<!--                        const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--                        tableBody.innerHTML = '';-->
-<!--                        data.forEach(item => {-->
-<!--                            const row = document.createElement('tr');-->
-<!--                            row.innerHTML = `-->
-<!--                                <td>${item.title}</td>-->
-<!--                                <td>${item.description}</td>-->
-<!--                                <td>${item.someint}</td>-->
-<!--                            `;-->
-<!--                            tableBody.appendChild(row);-->
-<!--                        });-->
+                        const tableBody = document.querySelector('#datatablesSimple tbody');
+                        tableBody.innerHTML = '';
+                        data.forEach(item => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="branch-name" data-bs-toggle="modal" data-bs-target="#dataModal">${item.title}</td>
+                                <td>${item.description}</td>
+                                <td>${item.someint}</td>
+                                <td>${item.active}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
                     })
                     .catch(error => console.error('Errors: ', error));
             }
-
+            // Запрашиваем данные при загрузке страницы и обновляем каждые 10 секунд
             setInterval(fetchData, 10000);
             fetchData();
         });

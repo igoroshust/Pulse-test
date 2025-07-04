@@ -115,9 +115,14 @@
             <main>
                 <div class="container-fluid px-4">
                     <h1 class="mt-4">Тестовый стенд</h1>
+                    <br>
+
+                    <h5 class="mt-6">Филиал: МФЦ Кыра</h5>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Статистика</li>
+                        <li class="breadcrumb-item active">Дата: 04.07.2025</li>
+                        <li class="breadcrumb-item active">Диапазон: 09:00 - 10:00</li>
                     </ol>
+
                     <div class="row">
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-primary text-white mb-4">
@@ -139,7 +144,7 @@
                         </div>
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-danger text-white mb-4" id="activeSessionsCard">
-                                <div class="card-body">Действующие окна</div>
+                                <div class="card-body">Среднее время ожидания</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">30</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
@@ -148,7 +153,43 @@
                         </div>
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-success text-white mb-4">
-                                <div class="card-body">Ожидание по талону</div>
+                                <div class="card-body">Окна по ПЗ</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-success text-white mb-4">
+                                <div class="card-body">Талоны ПЗ</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-danger text-white mb-4" id="activeWindowsCard-1">
+                                <div class="card-body">Талоны ЖЗ</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-warning text-white mb-4" id="activeSessionsCard-1">
+                                <div class="card-body">Отменённые талоны</div>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-primary text-white mb-4">
+                                <div class="card-body">Сброшенные талоны</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">30</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
@@ -165,38 +206,46 @@
                             <table id="datatablesSimple">
                                 <thead>
                                     <tr>
-                                        <th>Филиал</th>
-                                        <th>Активные окна</th>
-                                        <th>Действующие окна</th>
-                                        <th>Неактивные окна</th>
-                                        <th>Глубина записи по талону</th>
-                                        <th>Среднее время ожидания</th>
+                                        <th>Окно</th>
+                                        <th>Оператор</th>
+                                        <th>Активность окна</th>
+                                        <th>Фактическая активность окна</th>
+                                        <th>Обслужено талонов</th>
+                                        <th>Пауза</th>
                                     </tr>
                                 </thead>
-                                <tfoot>
-                                    <tr>
-                                        <th>Всего</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                </tfoot>
                                 <tbody>
                                     <tr>
-                                        <td class="branch-name" data-bs-toggle="modal" data-bs-target="#dataModal-1">МФЦ "Кыра"</td>
-                                        <td>10</td>
-                                        <td>7</td>
-                                        <td>8</td>
-                                        <td>12 минут</td>
-                                        <td>10 минут</td>
+                                        <td>№1</td>
+                                        <td>Холмогорова</td>
+                                        <td>40 минут</td>
+                                        <td>20 минут</td>
+                                        <td>5</td>
+                                        <td>5 минут</td>
                                     </tr>
                                     <tr>
-                                        <td class="branch-name" data-bs-toggle="modal" data-bs-target="#dataModal-1">МФЦ "Чара"</td>
-                                        <td>8</td>
-                                        <td>3</td>
-                                        <td>5</td>
-                                        <td>8 минут</td>
-                                        <td>14 минут</td>
+                                        <td>№2</td>
+                                        <td>Патрина</td>
+                                        <td>40 минут</td>
+                                        <td>25 минут</td>
+                                        <td>10</td>
+                                        <td>0 минут</td>
+                                    </tr>
+                                    <tr>
+                                        <td>№3</td>
+                                        <td>Казанцева</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <th><b>Всего</b></th>
+                                        <th></th>
+                                        <th><b><i>80 минут</i></b></th>
+                                        <th><b><i>45 минут</i></b></th>
+                                        <th><b><i>15 минут</i></b></th>
+                                        <th><b><i>5</i></b></th>
                                     </tr>
                                 </tbody>
                             </table>
@@ -249,41 +298,8 @@
         </div>
     </div>
 
-    <!-- Модальное окно -->
-    <div class="modal fade" id="dataModal-1" tabindex="-1" aria-labelledby="dataModalLabel-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="dataModalLabel-1">Выбор даты и диапазона</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="datePicker" class="form-label">Выберите дату:</label>
-                        <input type="date" class="form-control" id="datePicker">
-                    </div>
-                    <div class="mb-3">
-                        <label for="rangeSelect" class="form-label">Выберите диапазон:</label>
-                        <select class="form-select" id="rangeSelect">
-                            <option value="" disabled selected>Выберите диапазон</option>
-                            <option value="1">09:00 - 10:00</option>
-                            <option value="2">10:00 - 11:00</option>
-                            <option value="3">11:00 - 12:00</option>
-                        </select>
-                    </div>
-                    <button id="applyButton" class="btn btn-primary" disabled>Применить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const datePicker = document.getElementById('datePicker');
-            const rangeSelect = document.getElementById('rangeSelect');
-            const applyButton = document.getElementById('applyButton');
-            const modalTableBody = document.getElementById('modalTableBody');
-
             // Обработчик клика для карточки "Активные окна"
             document.getElementById('activeWindowsCard').addEventListener('click', function() {
                 openModal([
@@ -300,21 +316,9 @@
                 ]);
             });
 
-            // Обработчик клика для ячеек "Филиала"
-            const branchCells = document.querySelectorAll('.branch-name');
-            branchCells.forEach(cell => {
-                cell.addEventListener('click', function() {
-                    const branchName = this.textContent; // Получаем имя филиала
-                    console.log('Выбран филиал:', branchName); // Для отладки
-
-                    // Открываем модальное окно
-                    const modal = new bootstrap.Modal(document.getElementById('dataModal-1'));
-                    modal.show();
-                });
-            });
-
             // Функция для открытия модального окна и заполнения данными
             function openModal(data) {
+                const modalTableBody = document.getElementById('modalTableBody');
                 modalTableBody.innerHTML = ''; // Очищаем предыдущие данные
                 data.forEach(item => {
                     const row = document.createElement('tr');
@@ -332,35 +336,28 @@
                 modal.show();
             }
 
-            // Обработчик изменения для выбора даты и диапазона
-            datePicker.addEventListener('change', checkButtonState);
-            rangeSelect.addEventListener('change', checkButtonState);
-
-            function checkButtonState() {
-                if (datePicker.value && rangeSelect.value) {
-                    applyButton.disabled = false;
-                } else {
-                    applyButton.disabled = true;
-                }
+            // Ваш прежний код для WebSocket или fetch
+            function fetchData() {
+                fetch('http://localhost:8000/api/test/')
+                    .then(response => response.json())
+                    .then(data => {
+<!--                        const tableBody = document.querySelector('#datatablesSimple tbody');-->
+<!--                        tableBody.innerHTML = '';-->
+<!--                        data.forEach(item => {-->
+<!--                            const row = document.createElement('tr');-->
+<!--                            row.innerHTML = `-->
+<!--                                <td>${item.title}</td>-->
+<!--                                <td>${item.description}</td>-->
+<!--                                <td>${item.someint}</td>-->
+<!--                            `;-->
+<!--                            tableBody.appendChild(row);-->
+<!--                        });-->
+                    })
+                    .catch(error => console.error('Errors: ', error));
             }
 
-            // Обработчик клика на кнопку "Применить"
-            applyButton.addEventListener('click', function() {
-                window.location.href = 'about-page.html';
-            });
-
-<!--            // Ваш прежний код для WebSocket или fetch-->
-<!--            function fetchData() {-->
-<!--                fetch('http://localhost:8000/api/test/')-->
-<!--                    .then(response => response.json())-->
-<!--                    .then(data => {-->
-<!--                        // Обработка данных-->
-<!--                    })-->
-<!--                    .catch(error => console.error('Errors: ', error));-->
-<!--            }-->
-
-<!--            setInterval(fetchData, 10000);-->
-<!--            fetchData();-->
+            setInterval(fetchData, 10000);
+            fetchData();
         });
     </script>
 </body>

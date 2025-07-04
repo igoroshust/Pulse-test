@@ -183,7 +183,7 @@
                                 </tfoot>
                                 <tbody>
                                     <tr>
-                                        <td>МФЦ "Кыра"</td>
+                                        <td class="branch-name" data-bs-toggle="modal" data-bs-target="#dataModal-1">МФЦ "Кыра"</td>
                                         <td>10</td>
                                         <td>7</td>
                                         <td>8</td>
@@ -191,7 +191,7 @@
                                         <td>10 минут</td>
                                     </tr>
                                     <tr>
-                                        <td>МФЦ "Чара"</td>
+                                        <td class="branch-name" data-bs-toggle="modal" data-bs-target="#dataModal-1">МФЦ "Чара"</td>
                                         <td>8</td>
                                         <td>3</td>
                                         <td>5</td>
@@ -249,8 +249,41 @@
         </div>
     </div>
 
+    <!-- Модальное окно -->
+    <div class="modal fade" id="dataModal-1" tabindex="-1" aria-labelledby="dataModalLabel-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel-1">Выбор даты и диапазона</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="datePicker" class="form-label">Выберите дату:</label>
+                        <input type="date" class="form-control" id="datePicker">
+                    </div>
+                    <div class="mb-3">
+                        <label for="rangeSelect" class="form-label">Выберите диапазон:</label>
+                        <select class="form-select" id="rangeSelect">
+                            <option value="" disabled selected>Выберите диапазон</option>
+                            <option value="1">09:00 - 10:00</option>
+                            <option value="2">10:00 - 11:00</option>
+                            <option value="3">11:00 - 12:00</option>
+                        </select>
+                    </div>
+                    <button id="applyButton" class="btn btn-primary" disabled>Применить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const datePicker = document.getElementById('datePicker');
+            const rangeSelect = document.getElementById('rangeSelect');
+            const applyButton = document.getElementById('applyButton');
+            const modalTableBody = document.getElementById('modalTableBody');
+
             // Обработчик клика для карточки "Активные окна"
             document.getElementById('activeWindowsCard').addEventListener('click', function() {
                 openModal([
@@ -267,9 +300,21 @@
                 ]);
             });
 
+            // Обработчик клика для ячеек "Филиала"
+            const branchCells = document.querySelectorAll('.branch-name');
+            branchCells.forEach(cell => {
+                cell.addEventListener('click', function() {
+                    const branchName = this.textContent; // Получаем имя филиала
+                    console.log('Выбран филиал:', branchName); // Для отладки
+
+                    // Открываем модальное окно
+                    const modal = new bootstrap.Modal(document.getElementById('dataModal-1'));
+                    modal.show();
+                });
+            });
+
             // Функция для открытия модального окна и заполнения данными
             function openModal(data) {
-                const modalTableBody = document.getElementById('modalTableBody');
                 modalTableBody.innerHTML = ''; // Очищаем предыдущие данные
                 data.forEach(item => {
                     const row = document.createElement('tr');
@@ -287,28 +332,35 @@
                 modal.show();
             }
 
-            // Ваш прежний код для WebSocket или fetch
-            function fetchData() {
-                fetch('http://localhost:8000/api/test/')
-                    .then(response => response.json())
-                    .then(data => {
-<!--                        const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--                        tableBody.innerHTML = '';-->
-<!--                        data.forEach(item => {-->
-<!--                            const row = document.createElement('tr');-->
-<!--                            row.innerHTML = `-->
-<!--                                <td>${item.title}</td>-->
-<!--                                <td>${item.description}</td>-->
-<!--                                <td>${item.someint}</td>-->
-<!--                            `;-->
-<!--                            tableBody.appendChild(row);-->
-<!--                        });-->
-                    })
-                    .catch(error => console.error('Errors: ', error));
+            // Обработчик изменения для выбора даты и диапазона
+            datePicker.addEventListener('change', checkButtonState);
+            rangeSelect.addEventListener('change', checkButtonState);
+
+            function checkButtonState() {
+                if (datePicker.value && rangeSelect.value) {
+                    applyButton.disabled = false;
+                } else {
+                    applyButton.disabled = true;
+                }
             }
 
-            setInterval(fetchData, 10000);
-            fetchData();
+            // Обработчик клика на кнопку "Применить"
+            applyButton.addEventListener('click', function() {
+                window.location.href = 'about-page.html';
+            });
+
+<!--            // Ваш прежний код для WebSocket или fetch-->
+<!--            function fetchData() {-->
+<!--                fetch('http://localhost:8000/api/test/')-->
+<!--                    .then(response => response.json())-->
+<!--                    .then(data => {-->
+<!--                        // Обработка данных-->
+<!--                    })-->
+<!--                    .catch(error => console.error('Errors: ', error));-->
+<!--            }-->
+
+<!--            setInterval(fetchData, 10000);-->
+<!--            fetchData();-->
         });
     </script>
 </body>

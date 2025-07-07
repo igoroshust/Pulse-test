@@ -282,70 +282,71 @@
     </div>
 
     <script>
-        const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
 
-socket.onopen = function() {
-    console.log('Соединение установлено');
-    socket.send(JSON.stringify({ action: 'get_data' }));  // Отправляем запрос на получение данных
-};
+    const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
 
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    console.log('Полученные данные:', data);
+    socket.onopen = function() {
+        console.log('Соединение установлено');
+        socket.send(JSON.stringify({ action: 'get_data' }));  // Отправляем запрос на получение данных
+    };
 
-    const tableBody = document.querySelector('#datatablesSimple tbody');
-    tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        console.log('Полученные данные:', data);
 
-    let totalActiveWindows = 0; // Переменная для хранения суммы active_windows
-    let totalFactActiveWindows = 0; // Переменная для хранения суммы fact_active_windows
+        const tableBody = document.querySelector('#datatablesSimple tbody');
+        tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
 
-    data.data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="branch-name">${item.filial}</td>
-            <td>${item.active_windows}</td>
-            <td>${item.fact_active_windows}</td>
-            <td>${item.inactive_windows}</td>
-            <td>${item.deep_recording}</td>
-            <td>${item.average_time_waiting}</td>
-        `;
-        tableBody.appendChild(row);
+        let totalActiveWindows = 0; // Переменная для хранения суммы active_windows
+        let totalFactActiveWindows = 0; // Переменная для хранения суммы fact_active_windows
 
-        // Суммируем значения
-        totalActiveWindows += item.active_windows;
-        totalFactActiveWindows += item.fact_active_windows;
-    });
+        data.data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="branch-name">${item.filial}</td>
+                <td>${item.active_windows}</td>
+                <td>${item.fact_active_windows}</td>
+                <td>${item.inactive_windows}</td>
+                <td>${item.deep_recording}</td>
+                <td>${item.average_time_waiting}</td>
+            `;
+            tableBody.appendChild(row);
 
-    // Обновляем значения в карточках
-    document.querySelector('#activeWindowsCard a').textContent = totalActiveWindows;
-    document.querySelector('#activeSessionsCard a').textContent = totalFactActiveWindows;
-
-    // Привязываем обработчики событий к новым ячейкам
-    attachBranchClickHandlers();
-};
-
-socket.onerror = function(error) {
-    console.error('Ошибка WebSocket:', error);
-};
-
-socket.onclose = function(event) {
-    console.log('Соединение закрыто', event);
-};
-
-// Функция для привязки обработчиков событий к ячейкам с классом branch-name
-function attachBranchClickHandlers() {
-    const branchCells = document.querySelectorAll('.branch-name');
-    branchCells.forEach(cell => {
-        cell.addEventListener('click', function() {
-            const branchName = this.textContent; // Получаем имя филиала
-            console.log('Выбран филиал:', branchName); // Для отладки
-
-            // Открываем модальное окно
-            const modal = new bootstrap.Modal(document.getElementById('dataModal-1'));
-            modal.show();
+            // Суммируем значения
+            totalActiveWindows += item.active_windows;
+            totalFactActiveWindows += item.fact_active_windows;
         });
-    });
-}
+
+        // Обновляем значения в карточках
+        document.querySelector('#activeWindowsCard a').textContent = totalActiveWindows;
+        document.querySelector('#activeSessionsCard a').textContent = totalFactActiveWindows;
+
+        // Привязываем обработчики событий к новым ячейкам
+        attachBranchClickHandlers();
+    };
+
+    socket.onerror = function(error) {
+        console.error('Ошибка WebSocket:', error);
+    };
+
+    socket.onclose = function(event) {
+        console.log('Соединение закрыто', event);
+    };
+
+    // Функция для привязки обработчиков событий к ячейкам с классом branch-name
+    function attachBranchClickHandlers() {
+        const branchCells = document.querySelectorAll('.branch-name');
+        branchCells.forEach(cell => {
+            cell.addEventListener('click', function() {
+                const branchName = this.textContent; // Получаем имя филиала
+                console.log('Выбран филиал:', branchName); // Для отладки
+
+                // Открываем модальное окно
+                const modal = new bootstrap.Modal(document.getElementById('dataModal-1'));
+                modal.show();
+            });
+        });
+    }
 
     </script>
 
@@ -371,19 +372,6 @@ function attachBranchClickHandlers() {
                     { window: 1, operator: 'Холмогорова', branch: 'МФЦ “Кыра”', status: 'Обслуживает' },
                     { window: 2, operator: 'Патрина', branch: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
                 ]);
-            });
-
-            // Обработчик клика для ячеек "Филиала"
-            const branchCells = document.querySelectorAll('.branch-name');
-            branchCells.forEach(cell => {
-                cell.addEventListener('click', function() {
-                    const branchName = this.textContent; // Получаем имя филиала
-                    console.log('Выбран филиал:', branchName); // Для отладки
-
-                    // Открываем модальное окно
-                    const modal = new bootstrap.Modal(document.getElementById('dataModal-1'));
-                    modal.show();
-                });
             });
 
             // Функция для открытия модального окна и заполнения данными
@@ -419,11 +407,29 @@ function attachBranchClickHandlers() {
 
             // Обработчик клика на кнопку "Применить"
             applyButton.addEventListener('click', function() {
-                window.location.href = 'about-page.html';
+                const selectedDate = datePicker.value;
+                const selectedRange = rangeSelect.value;
+                const branchName = document.querySelector('.branch-name').textContent; // Получаем активный филиал
+
+                console.log(branchName);
+                console.log(selectedDate);
+                console.log(selectedRange);
+
+                // Отправляем данные на сервер
+                socket.send(JSON.stringify({
+                    action: 'apply',
+                    branch: branchName,
+                    date: selectedDate,
+                    range: selectedRange
+                }));
+
+                // Закрываем модальное окно
+                const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal-1'));
+                modal.hide();
+
+                // window.location.href = 'about-page.html';
             });
-
         });
-
     </script>
 
 

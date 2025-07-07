@@ -1,37 +1,52 @@
-from channels.generic.websocket import AsyncWebsocketConsumer # Асинхронный WS-потребитель
-from channels.db import database_sync_to_async
-import json
 import asyncio
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from django.db import connections
+import json
 
 
 class TestConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """Установка соединения"""
-        # Добавляем текущее соединение в группу "information_updates"
-        await self.accept() # Принятие соединения
+        await self.accept()  # Принятие соединения
+        print("Соединение установлено")  # Отладочное сообщение
         await self.channel_layer.group_add("information_updates", self.channel_name)
 
+        # Запускаем задачу для периодического получения данных
+        self.send_data_task = asyncio.create_task(self.send_data_periodically())
 
     async def disconnect(self, close_code):
         """Разрыв соединения"""
         await self.channel_layer.group_discard("information_updates", self.channel_name)
 
-    async def information_update(self, event):
-        """Событие обновления информации"""
-        data = event['data'] # Извлечение данных из события
-        # Отправляем данные клиенту в формате JSON
-        await self.send(text_data=json.dumps({'data': data}))
+        # Отменяем задачу, если она еще выполняется
+        if hasattr(self, 'send_data_task'):
+            self.send_data_task.cancel()
+
+    async def send_data_periodically(self):
+        """Периодическая отправка данных каждые 5 секунд"""
+        while True:
+            data = await self.get_data()
+            await self.send(text_data=json.dumps({'data': data}))
+            await asyncio.sleep(1022222222222)  # Ждем 5 секунд перед следующим запросом
 
     @database_sync_to_async
     def get_data(self):
         """Получение данных из базы (асинхронно)"""
-        from dashboard.models import Information
-        data = list(Information.objects.all().values())
-        print("Данные из базы:", data)
-        return data
+        try:
+            with connections['test'].cursor() as cursor:
+                cursor.execute("SELECT * FROM eo")
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+
+                # Преобразуем данные в список словарей
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+
+        except Exception as e:
+            return {'error': str(e)}
 
     async def receive(self, text_data):
         """Обработка полученных текстовых данных"""
-        print("Полученные данные:", text_data)
         data = await self.get_data()
-        await self.send(text_data=json.dumps({'data': list(data)}))
+        await self.send(text_data=json.dumps({'data': data}))

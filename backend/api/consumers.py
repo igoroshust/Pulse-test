@@ -1,15 +1,16 @@
-import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.db import connections
+from rest_framework.response import Response
+import asyncio
 import json
 
 
-class TestConsumer(AsyncWebsocketConsumer):
+class MainPageConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """Установка соединения"""
-        await self.accept()  # Принятие соединения
-        print("Соединение установлено")  # Отладочное сообщение
+        await self.accept()
+        print("Соединение установлено! (Main)")
         await self.channel_layer.group_add("information_updates", self.channel_name)
 
         # Запускаем задачу для периодического получения данных
@@ -28,7 +29,7 @@ class TestConsumer(AsyncWebsocketConsumer):
         while True:
             data = await self.get_data()
             await self.send(text_data=json.dumps({'data': data}))
-            await asyncio.sleep(10)  # Ждем 5 секунд перед следующим запросом
+            await asyncio.sleep(10000000)  # Ждем 5 секунд перед следующим запросом
 
     @database_sync_to_async
     def get_data(self):
@@ -46,30 +47,23 @@ class TestConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             return {'error': str(e)}
 
-    async def receive(self, text_data):
-        """Обработка полученных текстовых данных"""
-        data = json.loads(text_data)
 
-        if data.get('action') == 'apply':
-            branch = data.get('branch')
-            date = data.get('date')
-            range = data.get('range')
+class AboutPageConsumer(AsyncWebsocketConsumer):
+    """Потребитель для страницы about-page"""
+    async def connect(self):
+        await self.accept()
+        await self.channel_layer.group_add('about_page_updates', self.channel_name)
 
-            # Выполните SQL-запрос с использованием полученных данных
-            results = await self.get_results(branch, date, range)
-            await self.send(text_data=json.dumps({'data': results}))
-        else:
-            # Если действие не распознано, можно вернуть текущие данные
-            current_data = await self.get_data()
-            await self.send(text_data=json.dumps({'data': current_data}))
+    async def disconnect(self):
+        await self.disconnect()
+        await self.channel_layer.group_discard('about_page_updates', self.channel_name)
 
     @database_sync_to_async
-    def get_results(self, branch, date, range):
-        """Получение результатов на основе выбранных данных"""
+    def get_about_page_data(self, filial, date, range):
         try:
             with connections['test'].cursor() as cursor:
-                query = "SELECT * FROM eo WHERE branch = %s AND date = %s AND range = %s"
-                cursor.execute(query, [branch, date, range])
+                query = "SELECT * FROM eo WHERE filial = %s AND date = %s AND range = %s"
+                cursor.execute(query, [filial, date, range])
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
 
@@ -78,4 +72,20 @@ class TestConsumer(AsyncWebsocketConsumer):
                 return result
 
         except Exception as e:
-            return {'error': str(e)}
+            return {'Error': str(e)}
+
+    async def receive(self, text_data):
+        """Обработка полученных текстовых данных"""
+        data = json.loads(text_data)
+        print(data)
+
+        if data.get('action') == 'apply':
+            filial = data.get('filial')
+            date = data.get('date')
+            range = data.get('range')
+
+            # Выполняем SQL-запрос с полученными данными
+            results = await self.get_about_page_data(filial, date, range)
+            await self.send(text_data=json.dumps({'data': results}))
+        else:
+            print('Действие не распознано.')

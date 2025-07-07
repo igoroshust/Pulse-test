@@ -197,6 +197,30 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-table me-1"></i>
+                            Тестовая таблица
+                        </div>
+                        <div class="card-body">
+                            <table id="datatablesSimple-1">
+                                <thead>
+                                    <tr>
+                                        <th>Филиал</th>
+                                        <th>Время</th>
+                                        <th>Диапазон</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-table me-1"></i>
@@ -251,6 +275,7 @@
                             </table>
                         </div>
                     </div>
+
                 </div>
             </main>
             <footer class="py-4 bg-light mt-auto">
@@ -302,29 +327,29 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
         // Получаем данные из localStorage
-        const branch = localStorage.getItem('branch');
+        const filial = localStorage.getItem('filial');
         const date = localStorage.getItem('date');
         const range = localStorage.getItem('range');
 
         // Выводим данные в консоль
-        console.log('Филиал:', branch);
+        console.log('Филиал:', filial);
         console.log('Дата:', date);
         console.log('Диапазон:', range);
 
         // Удаляем данные из localStorage после получения
-        localStorage.removeItem('branch');
-        localStorage.removeItem('date');
-        localStorage.removeItem('range');
+        // localStorage.removeItem('filial');
+        // localStorage.removeItem('date');
+        // localStorage.removeItem('range');
 
         // Устанавливаем WebSocket соединение
-        const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
+        const socket = new WebSocket('ws://localhost:5000/ws/about_page_updates/');
         socket.onopen = function() {
-            console.log('Соединение установлено!');
+            console.log('Соединение установлено! (About)');
 
             // Отправляем запрос на получение данных
             socket.send(JSON.stringify({
                 action: 'apply',
-                branch: branch,
+                filial: filial,
                 date: date,
                 range: range
             }));
@@ -334,9 +359,9 @@
             const data = JSON.parse(event.data);
 
             // Обработка полученных данных и отображение их на странице
-            console.log(data);
+            // console.log(data);
 
-            // Здесь вы можете обновить интерфейс с полученными данными
+            // Обновляем интерфейс полученными данными
             updateTable(data.data);  // Функция для обновления таблицы
         };
         socket.onerror = function(error) {
@@ -347,7 +372,7 @@
         };
 });
 
-<!--// Функция для обновления таблицы-->
+// Функция для обновления таблицы
 <!--function updateTable(data) {-->
 <!--    const tableBody = document.querySelector('#datatablesSimple tbody');-->
 <!--    tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных-->
@@ -355,13 +380,28 @@
 <!--    data.forEach(item => {-->
 <!--        const row = document.createElement('tr');-->
 <!--        row.innerHTML = `-->
-<!--            <td>${item.some_column}</td>  -->
-<!--            <td>${item.another_column}</td>-->
-<!--            <td>${item.yet_another_column}</td>-->
+<!--            <td>${item.filial}</td>-->
+<!--            <td>${item.date}</td>-->
+<!--            <td>${item.range}</td>-->
 <!--        `;-->
 <!--        tableBody.appendChild(row);-->
 <!--    });-->
 <!--}-->
+
+function updateTable(data) {
+    const tableBody = document.querySelector('#datatablesSimple-1 tbody');
+    tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.filial}</td>
+            <td>${item.date}</td>
+            <td>${item.range}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
 
     </script>
 
@@ -370,16 +410,16 @@
             // Обработчик клика для карточки "Активные окна"
             document.getElementById('activeWindowsCard').addEventListener('click', function() {
                 openModal([
-                    { window: 1, operator: 'Холмогорова', branch: 'МФЦ “Кыра”', status: 'Нет на месте' },
-                    { window: 2, operator: 'Патрина', branch: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
+                    { window: 1, operator: 'Холмогорова', filial: 'МФЦ “Кыра”', status: 'Нет на месте' },
+                    { window: 2, operator: 'Патрина', filial: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
                 ]);
             });
 
             // Обработчик клика для карточки "Действующие окна"
             document.getElementById('activeSessionsCard').addEventListener('click', function() {
                 openModal([
-                    { window: 1, operator: 'Холмогорова', branch: 'МФЦ “Кыра”', status: 'Обслуживает' },
-                    { window: 2, operator: 'Патрина', branch: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
+                    { window: 1, operator: 'Холмогорова', filial: 'МФЦ “Кыра”', status: 'Обслуживает' },
+                    { window: 2, operator: 'Патрина', filial: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
                 ]);
             });
 
@@ -392,7 +432,7 @@
                     row.innerHTML = `
                         <td>${item.window}</td>
                         <td>${item.operator}</td>
-                        <td>${item.branch}</td>
+                        <td>${item.filial}</td>
                         <td>${item.status}</td>
                     `;
                     modalTableBody.appendChild(row);

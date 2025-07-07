@@ -282,11 +282,10 @@
     </div>
 
     <script>
-
-    const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
+    const socket = new WebSocket('ws://localhost:5000/ws/information_updates/');
 
     socket.onopen = function() {
-        console.log('Соединение установлено');
+        console.log('Соединение установлено! (Main)');
         socket.send(JSON.stringify({ action: 'get_data' }));  // Отправляем запрос на получение данных
     };
 
@@ -333,13 +332,18 @@
         console.log('Соединение закрыто', event);
     };
 
+
     // Функция для привязки обработчиков событий к ячейкам с классом branch-name
+
+    let selectedFilial = '';
+
     function attachBranchClickHandlers() {
-        const branchCells = document.querySelectorAll('.branch-name');
-        branchCells.forEach(cell => {
+        const filialCells = document.querySelectorAll('.branch-name');
+        filialCells.forEach(cell => {
             cell.addEventListener('click', function() {
-                const branchName = this.textContent; // Получаем имя филиала
-                console.log('Выбран филиал:', branchName); // Для отладки
+                selectedFilial = this.textContent; // Получаем имя филиала
+                console.log('Выбран филиал:', selectedFilial); // Для отладки
+
 
                 // Открываем модальное окно
                 const modal = new bootstrap.Modal(document.getElementById('dataModal-1'));
@@ -347,7 +351,6 @@
             });
         });
     }
-
     </script>
 
 
@@ -361,16 +364,16 @@
             // Обработчик клика для карточки "Активные окна"
             document.getElementById('activeWindowsCard').addEventListener('click', function() {
                 openModal([
-                    { window: 1, operator: 'Холмогорова', branch: 'МФЦ “Кыра”', status: 'Нет на месте' },
-                    { window: 2, operator: 'Патрина', branch: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
+                    { window: 1, operator: 'Холмогорова', filial: 'МФЦ “Кыра”', status: 'Нет на месте' },
+                    { window: 2, operator: 'Патрина', filial: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
                 ]);
             });
 
             // Обработчик клика для карточки "Действующие окна"
             document.getElementById('activeSessionsCard').addEventListener('click', function() {
                 openModal([
-                    { window: 1, operator: 'Холмогорова', branch: 'МФЦ “Кыра”', status: 'Обслуживает' },
-                    { window: 2, operator: 'Патрина', branch: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
+                    { window: 1, operator: 'Холмогорова', filial: 'МФЦ “Кыра”', status: 'Обслуживает' },
+                    { window: 2, operator: 'Патрина', filial: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
                 ]);
             });
 
@@ -382,7 +385,7 @@
                     row.innerHTML = `
                         <td>${item.window}</td>
                         <td>${item.operator}</td>
-                        <td>${item.branch}</td>
+                        <td>${item.filial}</td>
                         <td>${item.status}</td>
                     `;
                     modalTableBody.appendChild(row);
@@ -409,16 +412,15 @@
             applyButton.addEventListener('click', function() {
                 const selectedDate = datePicker.value;
                 const selectedRange = rangeSelect.value;
-                const branchName = document.querySelector('.branch-name').textContent; // Получаем активный филиал
 
-                console.log(branchName);
+                console.log(selectedFilial);
                 console.log(selectedDate);
                 console.log(selectedRange);
 
                 // Отправляем данные на сервер
                 socket.send(JSON.stringify({
                     action: 'apply',
-                    branch: branchName,
+                    filial: selectedFilial,
                     date: selectedDate,
                     range: selectedRange
                 }));
@@ -428,7 +430,7 @@
                 modal.hide();
 
                 // Сохраняем данные в localStorage
-                localStorage.setItem('branch', branchName);
+                localStorage.setItem('filial', selectedFilial);
                 localStorage.setItem('date', selectedDate);
                 localStorage.setItem('range', selectedRange);
 

@@ -298,6 +298,73 @@
         </div>
     </div>
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Получаем данные из localStorage
+        const branch = localStorage.getItem('branch');
+        const date = localStorage.getItem('date');
+        const range = localStorage.getItem('range');
+
+        // Выводим данные в консоль
+        console.log('Филиал:', branch);
+        console.log('Дата:', date);
+        console.log('Диапазон:', range);
+
+        // Удаляем данные из localStorage после получения
+        localStorage.removeItem('branch');
+        localStorage.removeItem('date');
+        localStorage.removeItem('range');
+
+        // Устанавливаем WebSocket соединение
+        const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
+        socket.onopen = function() {
+            console.log('Соединение установлено!');
+
+            // Отправляем запрос на получение данных
+            socket.send(JSON.stringify({
+                action: 'apply',
+                branch: branch,
+                date: date,
+                range: range
+            }));
+        };
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            // Обработка полученных данных и отображение их на странице
+            console.log(data);
+
+            // Здесь вы можете обновить интерфейс с полученными данными
+            updateTable(data.data);  // Функция для обновления таблицы
+        };
+        socket.onerror = function(error) {
+            console.error('Ошибка WebSocket:', error);
+        };
+        socket.onclose = function(event) {
+            console.log('Соединение закрыто', event);
+        };
+});
+
+<!--// Функция для обновления таблицы-->
+<!--function updateTable(data) {-->
+<!--    const tableBody = document.querySelector('#datatablesSimple tbody');-->
+<!--    tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных-->
+
+<!--    data.forEach(item => {-->
+<!--        const row = document.createElement('tr');-->
+<!--        row.innerHTML = `-->
+<!--            <td>${item.some_column}</td>  -->
+<!--            <td>${item.another_column}</td>-->
+<!--            <td>${item.yet_another_column}</td>-->
+<!--        `;-->
+<!--        tableBody.appendChild(row);-->
+<!--    });-->
+<!--}-->
+
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Обработчик клика для карточки "Активные окна"
@@ -335,29 +402,6 @@
                 const modal = new bootstrap.Modal(document.getElementById('dataModal'));
                 modal.show();
             }
-
-            // Ваш прежний код для WebSocket или fetch
-            function fetchData() {
-                fetch('http://localhost:8000/api/test/')
-                    .then(response => response.json())
-                    .then(data => {
-<!--                        const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--                        tableBody.innerHTML = '';-->
-<!--                        data.forEach(item => {-->
-<!--                            const row = document.createElement('tr');-->
-<!--                            row.innerHTML = `-->
-<!--                                <td>${item.title}</td>-->
-<!--                                <td>${item.description}</td>-->
-<!--                                <td>${item.someint}</td>-->
-<!--                            `;-->
-<!--                            tableBody.appendChild(row);-->
-<!--                        });-->
-                    })
-                    .catch(error => console.error('Errors: ', error));
-            }
-
-            setInterval(fetchData, 10000);
-            fetchData();
         });
     </script>
 </body>

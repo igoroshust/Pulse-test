@@ -28,7 +28,7 @@ class TestConsumer(AsyncWebsocketConsumer):
         while True:
             data = await self.get_data()
             await self.send(text_data=json.dumps({'data': data}))
-            await asyncio.sleep(1022222222222)  # Ждем 5 секунд перед следующим запросом
+            await asyncio.sleep(10)  # Ждем 5 секунд перед следующим запросом
 
     @database_sync_to_async
     def get_data(self):
@@ -48,5 +48,34 @@ class TestConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         """Обработка полученных текстовых данных"""
-        data = await self.get_data()
-        await self.send(text_data=json.dumps({'data': data}))
+        data = json.loads(text_data)
+
+        if data.get('action') == 'apply':
+            branch = data.get('branch')
+            date = data.get('date')
+            range = data.get('range')
+
+            # Выполните SQL-запрос с использованием полученных данных
+            results = await self.get_results(branch, date, range)
+            await self.send(text_data=json.dumps({'data': results}))
+        else:
+            # Если действие не распознано, можно вернуть текущие данные
+            current_data = await self.get_data()
+            await self.send(text_data=json.dumps({'data': current_data}))
+
+    @database_sync_to_async
+    def get_results(self, branch, date, range):
+        """Получение результатов на основе выбранных данных"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = "SELECT * FROM eo WHERE branch = %s AND date = %s AND range = %s"
+                cursor.execute(query, [branch, date, range])
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+
+                # Преобразуем данные в список словарей
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+
+        except Exception as e:
+            return {'error': str(e)}

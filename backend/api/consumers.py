@@ -28,7 +28,7 @@ class TestConsumer(AsyncWebsocketConsumer):
         while True:
             data = await self.get_data()
             await self.send(text_data=json.dumps({'data': data}))
-            await asyncio.sleep(50000000000000000)  # Ждем 5 секунд перед следующим запросом
+            await asyncio.sleep(10)  # Ждем 5 секунд перед следующим запросом
 
     @database_sync_to_async
     def get_data(self):

@@ -292,7 +292,7 @@
 
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        console.log('Полученные данные:', data);
+       // console.log('Полученные данные:', data);
 
         const tableBody = document.querySelector('#datatablesSimple tbody');
         tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
@@ -427,7 +427,13 @@
                 const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal-1'));
                 modal.hide();
 
-                // window.location.href = 'about-page.html';
+                // Сохраняем данные в localStorage
+                localStorage.setItem('branch', branchName);
+                localStorage.setItem('date', selectedDate);
+                localStorage.setItem('range', selectedRange);
+
+                // Перенаправляем на about-page
+                window.location.href = 'about-page.html';
             });
         });
     </script>

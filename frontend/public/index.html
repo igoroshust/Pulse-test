@@ -281,7 +281,7 @@
         </div>
     </div>
 
-    <script>
+<script>
     const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
 
     socket.onopen = function() {
@@ -291,25 +291,37 @@
 
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
-       // console.log('Полученные данные:', data);
+        console.log('Полученные данные:', data);
 
         const tableBody = document.querySelector('#datatablesSimple tbody');
-        tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
 
         let totalActiveWindows = 0; // Переменная для хранения суммы active_windows
         let totalFactActiveWindows = 0; // Переменная для хранения суммы fact_active_windows
 
         data.data.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="branch-name">${item.filial}</td>
-                <td>${item.active_windows}</td>
-                <td>${item.fact_active_windows}</td>
-                <td>${item.inactive_windows}</td>
-                <td>${item.deep_recording}</td>
-                <td>${item.average_time_waiting}</td>
-            `;
-            tableBody.appendChild(row);
+            // Проверяем, существует ли уже строка с таким филиалом
+            let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === item.filial);
+
+            if (existingRow) {
+                // Обновляем существующую строку
+                existingRow.cells[1].textContent = item.active_windows;
+                existingRow.cells[2].textContent = item.fact_active_windows;
+                existingRow.cells[3].textContent = item.inactive_windows;
+                existingRow.cells[4].textContent = item.deep_recording;
+                existingRow.cells[5].textContent = item.average_time_waiting;
+            } else {
+                // Если строки нет, добавляем новую
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="branch-name">${item.filial}</td>
+                    <td>${item.active_windows}</td>
+                    <td>${item.fact_active_windows}</td>
+                    <td>${item.inactive_windows}</td>
+                    <td>${item.deep_recording}</td>
+                    <td>${item.average_time_waiting}</td>
+                `;
+                tableBody.appendChild(row);
+            }
 
             // Суммируем значения
             totalActiveWindows += item.active_windows;
@@ -332,9 +344,7 @@
         console.log('Соединение закрыто', event);
     };
 
-
     // Функция для привязки обработчиков событий к ячейкам с классом branch-name
-
     let selectedFilial = '';
 
     function attachBranchClickHandlers() {
@@ -344,14 +354,14 @@
                 selectedFilial = this.textContent; // Получаем имя филиала
                 console.log('Выбран филиал:', selectedFilial); // Для отладки
 
-
                 // Открываем модальное окно
                 const modal = new bootstrap.Modal(document.getElementById('dataModal-1'));
                 modal.show();
             });
         });
     }
-    </script>
+</script>
+
 
 
     <script>
@@ -360,6 +370,7 @@
             const rangeSelect = document.getElementById('rangeSelect');
             const applyButton = document.getElementById('applyButton');
             const modalTableBody = document.getElementById('modalTableBody');
+
 
             // Обработчик клика для карточки "Активные окна"
             document.getElementById('activeWindowsCard').addEventListener('click', function() {

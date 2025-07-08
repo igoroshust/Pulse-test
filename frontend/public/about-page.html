@@ -117,10 +117,10 @@
                     <h1 class="mt-4">Тестовый стенд</h1>
                     <br>
 
-                    <h5 class="mt-6">Филиал: МФЦ Кыра</h5>
+                    <h5 class="mt-6" id="filial">Филиал: МФЦ Кыра</h5>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Дата: 04.07.2025</li>
-                        <li class="breadcrumb-item active">Диапазон: 09:00 - 10:00</li>
+                        <li class="breadcrumb-item active" id="date">Дата: 04.07.2025</li>
+                        <li class="breadcrumb-item active" id="range">Диапазон: 09:00 - 10:00</li>
                     </ol>
 
                     <div class="row">
@@ -332,9 +332,14 @@
         const range = localStorage.getItem('range');
 
         // Выводим данные в консоль
-        console.log('Филиал:', filial);
-        console.log('Дата:', date);
-        console.log('Диапазон:', range);
+        console.log(filial);
+        console.log(date);
+        console.log(range);
+
+        // Отображаем данные на странице
+        document.getElementById('filial').textContent = 'Филиал: ' + filial;
+        document.getElementById('date').textContent = 'Дата: ' + date;
+        document.getElementById('range').textContent = 'Диапазон: ' + range;
 
         // Удаляем данные из localStorage после получения
         // localStorage.removeItem('filial');
@@ -362,7 +367,7 @@
             // console.log(data);
 
             // Обновляем интерфейс полученными данными
-            // updateTable(data.data);  // Функция для обновления таблицы
+            updateTable(data.data);  // Функция для обновления таблицы
         };
         socket.onerror = function(error) {
             console.error('Ошибка WebSocket:', error);
@@ -370,37 +375,22 @@
         socket.onclose = function(event) {
             console.log('Соединение закрыто', event);
         };
-});
+        });
 
-// Функция для обновления таблицы
-<!--function updateTable(data) {-->
-<!--    const tableBody = document.querySelector('#datatablesSimple tbody');-->
-<!--    tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных-->
+        // Функция для обновления таблицы
+        function updateTable(data) {
+            const tableBody = document.querySelector('#datatablesSimple-1 tbody');
+            tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
 
-<!--    data.forEach(item => {-->
-<!--        const row = document.createElement('tr');-->
-<!--        row.innerHTML = `-->
-<!--            <td>${item.filial}</td>-->
-<!--            <td>${item.date}</td>-->
-<!--            <td>${item.range}</td>-->
-<!--        `;-->
-<!--        tableBody.appendChild(row);-->
-<!--    });-->
-<!--}-->
-
-function updateTable(data) {
-    const tableBody = document.querySelector('#datatablesSimple-1 tbody');
-    tableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
-
-    data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${item.filial}</td>
-            <td>${item.date}</td>
-            <td>${item.range}</td>
-        `;
-        tableBody.appendChild(row);
-    });
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.filial}</td>
+                    <td>${item.date}</td>
+                    <td>${item.range}</td>
+                `;
+                tableBody.appendChild(row);
+            });
 }
 
     </script>

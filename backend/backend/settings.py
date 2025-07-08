@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'channels',
+    'debug_toolbar',
     'corsheaders',
     'dashboard',
     'rest_framework',
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -182,3 +184,8 @@ CHANNEL_LAYERS = {
 #         }
 #     }
 # }
+
+# Debug Toolbar
+INTERNAL_IPS = [
+      '127.0.0.1',
+  ]

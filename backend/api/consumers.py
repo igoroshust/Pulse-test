@@ -1,16 +1,16 @@
+from django.core.cache import cache
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.db import connections
-from rest_framework.response import Response
 import asyncio
 import json
 
 
 class MainPageConsumer(AsyncWebsocketConsumer):
+    """Потребитель для главной страницы"""
     async def connect(self):
         """Установка соединения"""
         await self.accept()
-        print("Соединение установлено! (Main)")
         await self.channel_layer.group_add("information_updates", self.channel_name)
 
         # Запускаем задачу для периодического получения данных
@@ -29,7 +29,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         while True:
             data = await self.get_data()
             await self.send(text_data=json.dumps({'data': data}))
-            await asyncio.sleep(10000000)  # Ждем 5 секунд перед следующим запросом
+            await asyncio.sleep(10)  # Ждем 5 секунд перед следующим запросом
 
     @database_sync_to_async
     def get_data(self):
@@ -42,6 +42,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 
                 # Преобразуем данные в список словарей
                 result = [dict(zip(columns, row)) for row in data]
+
                 return result
 
         except Exception as e:
@@ -57,6 +58,7 @@ class AboutPageConsumer(AsyncWebsocketConsumer):
     async def disconnect(self):
         await self.disconnect()
         await self.channel_layer.group_discard('about_page_updates', self.channel_name)
+
 
     @database_sync_to_async
     def get_about_page_data(self, filial, date, range):

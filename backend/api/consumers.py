@@ -1,4 +1,4 @@
-from django.core.cache import cache
+# from django.core.cache import cache
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.db import connections
@@ -45,18 +45,27 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_data(self):
-        """Получение данных из базы (асинхронно)"""
+        """Получение данных ДЛЯ ТАБЛИЦЫ из базы (асинхронно)"""
         try:
             with connections['test'].cursor() as cursor:
-                cursor.execute("SELECT * FROM eo")
+                # Запрос для получения названий филиалов, количества активных окон и фактических активных окон
+                query = """
+                SELECT d.name AS filial_name,
+                       w.number AS window_number,
+                       COUNT(CASE WHEN w.active = 1  AND w.deleted = 0 THEN 1 END) AS active_windows_count,
+                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0  AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
+                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 0  AND w.deleted = 0 THEN 1 END) AS inactive_windows
+                FROM window w
+                JOIN department d ON w.department_id = d.id
+                GROUP BY d.name
+                ORDER BY d.name;
+                """
+                cursor.execute(query)
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
-
                 # Преобразуем данные в список словарей
                 result = [dict(zip(columns, row)) for row in data]
-
                 return result
-
         except Exception as e:
             return {'error': str(e)}
 
@@ -67,10 +76,8 @@ class AboutPageConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.channel_layer.group_add('about_page_updates', self.channel_name)
 
-    async def disconnect(self):
-        await self.disconnect()
+    async def disconnect(self, close_code):  # Добавляем аргумент close_code
         await self.channel_layer.group_discard('about_page_updates', self.channel_name)
-
 
     @database_sync_to_async
     def get_about_page_data(self, filial, date, range):
@@ -78,7 +85,7 @@ class AboutPageConsumer(AsyncWebsocketConsumer):
             with connections['test'].cursor() as cursor:
                 query = "SELECT * FROM eo WHERE filial = %s AND date = %s AND range = %s"
                 cursor.execute(query, [filial, date, range])
-                columns = [col[0] for col in cursor.description] # Получаем названия столбцов из результата запроса
+                columns = [col[0] for col in cursor.description]  # Получаем названия столбцов из результата запроса
                 data = cursor.fetchall()
 
                 # Преобразуем данные в список словарей, где ключи - названия столбцов
@@ -90,7 +97,7 @@ class AboutPageConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         """Обработка полученных текстовых данных через WebSocket"""
-        data = json.loads(text_data) # Декодируем входящие текстовые данных из JSON-формата
+        data = json.loads(text_data)  # Декодируем входящие текстовые данных из JSON-формата
         print(data)
 
         # Проверяем, какое действие указано в полученных данных

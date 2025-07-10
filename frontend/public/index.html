@@ -288,18 +288,19 @@
 
             if (existingRow) {
                 // Обновляем существующую строку
-                existingRow.cells[1].textContent = item.active_windows;
-                existingRow.cells[2].textContent = item.fact_active_windows;
-                existingRow.cells[3].textContent = item.inactive_windows;
-                existingRow.cells[4].textContent = item.deep_recording;
-                existingRow.cells[5].textContent = item.average_time_waiting;
+                existingRow.cells[1].textContent = item.filial_name;
+                existingRow.cells[2].textContent = item.active_windows_count;
+                existingRow.cells[3].textContent = item.fact_active_windows_count;
+                existingRow.cells[4].textContent = item.inactive_windows;
+                existingRow.cells[5].textContent = item.deep_recording;
+                existingRow.cells[6].textContent = item.average_time_waiting;
             } else {
                 // Если строки нет, добавляем новую
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="branch-name">${item.filial}</td>
-                    <td>${item.active_windows}</td>
-                    <td>${item.fact_active_windows}</td>
+                    <td class="branch-name">${item.filial_name}</td>
+                    <td>${item.active_windows_count}</td>
+                    <td>${item.fact_active_windows_count}</td>
                     <td>${item.inactive_windows}</td>
                     <td>${item.deep_recording}</td>
                     <td>${item.average_time_waiting}</td>
@@ -308,8 +309,9 @@
             }
 
             // Суммируем значения
-            totalActiveWindows += item.active_windows;
-            totalFactActiveWindows += item.fact_active_windows;
+            totalActiveWindows += item.active_windows_count;
+            totalFactActiveWindows += item.fact_active_windows_count;
+
         });
 
         // Обновляем значения в карточках
@@ -378,14 +380,13 @@
                 data.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${item.window}</td>
+                        <td>${item.window_number}</td>  <!-- Изменено на window_number -->
                         <td>${item.operator}</td>
                         <td>${item.filial}</td>
                         <td>${item.status}</td>
                     `;
                     modalTableBody.appendChild(row);
                 });
-
                 // Показываем модальное окно
                 const modal = new bootstrap.Modal(document.getElementById('dataModal'));
                 modal.show();

@@ -293,7 +293,7 @@
                 existingRow.cells[3].textContent = item.fact_active_windows_count;
                 existingRow.cells[4].textContent = item.inactive_windows;
                 existingRow.cells[5].textContent = item.deep_recording;
-                existingRow.cells[6].textContent = item.average_time_waiting;
+                existingRow.cells[6].textContent = item.difference_in_minutes;
             } else {
                 // Если строки нет, добавляем новую
                 const row = document.createElement('tr');
@@ -303,7 +303,7 @@
                     <td>${item.fact_active_windows_count}</td>
                     <td>${item.inactive_windows}</td>
                     <td>${item.deep_recording}</td>
-                    <td>${item.average_time_waiting}</td>
+                    <td>${item.difference_in_minutes} минут</td>
                 `;
                 tableBody.appendChild(row);
             }

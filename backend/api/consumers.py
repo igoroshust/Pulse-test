@@ -33,7 +33,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         """Проверка изменений в базе данных"""
         last_data = await self.get_data()
         while True:
-            await asyncio.sleep(10)  # Проверяем каждые 5 секунд
+            await asyncio.sleep(10000000000)  # Проверяем каждые 5 секунд
             current_data = await self.get_data()
 
             # Находим изменившиеся данные
@@ -52,12 +52,17 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 query = """
                 SELECT d.name AS filial_name,
                        w.number AS window_number,
-                       COUNT(CASE WHEN w.active = 1  AND w.deleted = 0 THEN 1 END) AS active_windows_count,
-                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0  AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
-                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 0  AND w.deleted = 0 THEN 1 END) AS inactive_windows
+                       COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) AS active_windows_count,
+                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
+                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 0 AND w.deleted = 0 THEN 1 END) AS inactive_windows,
+                       AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) AS difference_in_minutes,
+                       s.fio
                 FROM window w
                 JOIN department d ON w.department_id = d.id
-                GROUP BY d.name
+                LEFT JOIN seans s ON s.unit_id = d.unit_id
+                WHERE s.serv_day = date('now') AND s.status_id = 1 AND s.start_wait_time IS NOT NULL
+                GROUP BY d.name, w.number, s.fio
+                HAVING AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) > 0
                 ORDER BY d.name;
                 """
                 cursor.execute(query)
@@ -113,3 +118,45 @@ class AboutPageConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({'data': results}))
         else:
             print('Действие не распознано.')
+
+
+# CREATE TABLE unit (
+#     id INTEGER PRIMARY KEY,
+#     main INTEGER,
+#     company_id INTEGER,
+#     terminal_footer VARCHAR(500),
+#     talon_template INTEGER,
+#     talon_scrolling INTEGER,
+#     code INTEGER,
+#     tablo_header INTEGER,
+#     district_id INTEGER,
+#     notifier_code INTEGER,
+#     terminal_header VARCHAR(500),
+#     information VARCHAR(500),
+#     display_header VARCHAR(500),
+#     passphrase VARCHAR(500),
+#     server_id INTEGER,
+#     legal_address VARCHAR(500),
+#     legal_address_description VARCHAR(500),
+#     short_address VARCHAR(500),
+#     name VARCHAR(500),
+#     short_name VARCHAR(500),
+#     phone VARCHAR(500),
+#     fax VARCHAR(500),
+#     email VARCHAR(500),
+#     description VARCHAR(500),
+#     oktmo_object_id INTEGER,
+#     working_hours VARCHAR(500),
+#     longitude INTEGER,
+#     latitude INTEGER,
+#     latitude INTEGER,
+#     sper_id INTEGER,
+#     talon_template_id INTEGER,
+#     work_time_id INTEGER,
+#     mdm_filial_guid VARCHAR(500),
+#     parent_unit_id INTEGER,
+#     mkgu_id INTEGER,
+#     mkgu_okato INTEGER,
+#     pre_record_time_id INTEGER,
+#     external_id INTEGER
+# );

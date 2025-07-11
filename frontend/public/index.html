@@ -151,7 +151,7 @@
                             </div>
                         </div>
                         <div class="col-xl-3 col-md-6">
-                            <div class="card bg-success text-white mb-4">
+                            <div class="card bg-success text-white mb-4" id="differenceInMinutes">
                                 <div class="card-body">Ожидание по талону</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">30</a>
@@ -281,6 +281,7 @@
 
         let totalActiveWindows = 0; // Переменная для хранения суммы active_windows
         let totalFactActiveWindows = 0; // Переменная для хранения суммы fact_active_windows
+        let totalDifferenceInMinutes = 0; // Переменная для хранения суммы difference_in_minutes
 
         data.data.forEach(item => {
             // Проверяем, существует ли уже строка с таким филиалом
@@ -311,12 +312,15 @@
             // Суммируем значения
             totalActiveWindows += item.active_windows_count;
             totalFactActiveWindows += item.fact_active_windows_count;
+            totalDifferenceInMinutes += item.difference_in_minutes;
 
         });
 
         // Обновляем значения в карточках
         document.querySelector('#activeWindowsCard a').textContent = totalActiveWindows;
         document.querySelector('#activeSessionsCard a').textContent = totalFactActiveWindows;
+        document.querySelector('#differenceInMinutes a').textContent = totalDifferenceInMinutes + ' минут';
+
 
         // Привязываем обработчики событий к новым ячейкам
         attachBranchClickHandlers();

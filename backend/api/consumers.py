@@ -75,17 +75,9 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             return {'error': str(e)}
 
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-
-        if data.get('action') == 'get_active_branches':
-            # Получаем данные о филиалах с активными окнами
-            active_branches = await self.get_active_branches()
-            await self.send(text_data=json.dumps({'action': 'get_active_branches', 'data': active_branches}))
-
     @database_sync_to_async
     def get_active_branches(self):
-        """Получение данных о филиалах с активными окнами"""
+        """Активные окна"""
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -106,6 +98,47 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             return {'error': str(e)}
+
+
+    @database_sync_to_async
+    def get_fact_active_windows(self):
+        """Действующие окна"""
+
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                SELECT 
+                    d.name AS filial_name, 
+                    w.number AS window_number,
+                    s.fio AS fio
+                FROM window w
+                JOIN department d ON w.department_id = d.id
+                JOIN seans s ON s.unit_id = d.unit_id
+                WHERE w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+
+        except Exception as e:
+            return {'error': str(e)}
+
+
+    async def receive(self, text_data):
+        """Обработка полученных от сервера данных"""
+        data = json.loads(text_data)
+
+        if data.get('action') == 'get_active_branches':
+            # Получаем данные об активных окнах
+            active_branches = await self.get_active_branches()
+            await self.send(text_data=json.dumps({'action': 'get_active_branches', 'data': active_branches}))
+
+        if data.get('action') == 'get_fact_active_windows':
+            # Получаем данные о действующих окнах
+            fact_active_windows = await self.get_fact_active_windows()
+            await self.send(text_data=json.dumps({'action': 'get_fact_active_windows', 'data': fact_active_windows}))
 
 
 class AboutPageConsumer(AsyncWebsocketConsumer):

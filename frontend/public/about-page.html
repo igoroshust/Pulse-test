@@ -347,7 +347,7 @@
         // localStorage.removeItem('range');
 
         // Устанавливаем WebSocket соединение
-        const socket = new WebSocket('ws://localhost:8080/ws/about_page_updates/');
+        const socket = new WebSocket('ws://localhost:5050/ws/about_page_updates/');
         socket.onopen = function() {
             console.log('Соединение установлено! (About)');
 

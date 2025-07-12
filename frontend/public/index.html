@@ -272,7 +272,7 @@
     </div>
 
 <script>
-    const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
+    const socket = new WebSocket('ws://localhost:5050/ws/information_updates/');
 
     socket.onopen = function() {
         console.log('Соединение установлено! (Main)');
@@ -282,6 +282,11 @@
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
         console.log('Полученные данные:', data);
+
+        if (data.action === 'get_active_branches') {
+            openModal(data.data);
+            return;
+        }
 
         const tableBody = document.querySelector('#datatablesSimple tbody');
 
@@ -327,9 +332,13 @@
         document.querySelector('#activeSessionsCard a').textContent = totalFactActiveWindows;
         document.querySelector('#differenceInMinutes a').textContent = totalDifferenceInMinutes + ' минут';
 
-
         // Привязываем обработчики событий к новым ячейкам
         attachBranchClickHandlers();
+
+        // Обработка данных о филиалах с активными окнами
+        if (data.action === 'get_active_branches') {
+            openModal(data.data);
+        }
     };
 
     socket.onerror = function(error) {
@@ -339,6 +348,25 @@
     socket.onclose = function(event) {
         console.log('Соединение закрыто', event);
     };
+
+    // Функция для открытия модального окна и заполнения данными
+    function openModal(data) {
+        const modalTableBody = document.getElementById('modalTableBody');
+        modalTableBody.innerHTML = ''; // Очищаем предыдущие данные
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.window_number}</td>
+                <td>${item.fio || 'Неизвестно'}</td> <!-- Добавьте логику для оператора, если нужно -->
+                <td>${item.filial_name}</td>
+                <td>${item.status || 'Неизвестно'}</td> <!-- Добавьте логику для статуса, если нужно -->
+            `;
+            modalTableBody.appendChild(row);
+        });
+        // Показываем модальное окно
+        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+        modal.show();
+    }
 
     // Функция для привязки обработчиков событий к ячейкам с классом branch-name
     let selectedFilial = '';
@@ -356,95 +384,73 @@
             });
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const datePicker = document.getElementById('datePicker');
+        const rangeSelect = document.getElementById('rangeSelect');
+        const applyButton = document.getElementById('applyButton');
+
+        // Обработчик клика для карточки "Активные окна"
+        document.getElementById('activeWindowsCard').addEventListener('click', function() {
+            // Отправляем запрос на получение активных филиалов
+            socket.send(JSON.stringify({ action: 'get_active_branches' }));
+        });
+
+        // Обработчик клика для карточки "Действующие окна"
+        document.getElementById('activeSessionsCard').addEventListener('click', function() {
+            openModal([
+                { window: 1, operator: 'Холмогорова', filial: 'МФЦ “Кыра”', status: 'Обслуживает' },
+                { window: 2, operator: 'Патрина', filial: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
+            ]);
+        });
+
+        // Обработчик изменения для выбора даты и диапазона
+        datePicker.addEventListener('change', checkButtonState);
+        rangeSelect.addEventListener('change', checkButtonState);
+
+        function checkButtonState() {
+            if (datePicker.value && rangeSelect.value) {
+                applyButton.disabled = false;
+            } else {
+                applyButton.disabled = true;
+            }
+        }
+
+        // Обработчик клика на кнопку "Применить"
+        applyButton.addEventListener('click', function() {
+            const selectedDate = datePicker.value;
+            const selectedRange = rangeSelect.value;
+
+            console.log(selectedFilial);
+            console.log(selectedDate);
+            console.log(selectedRange);
+
+            // Отправляем данные на сервер
+            socket.send(JSON.stringify({
+                action: 'apply',
+                filial: selectedFilial,
+                date: selectedDate,
+                range: selectedRange
+            }));
+
+            // Закрываем модальное окно
+            const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal-1'));
+            modal.hide();
+
+            // Сохраняем данные в localStorage
+            localStorage.setItem('filial', selectedFilial);
+            localStorage.setItem('date', selectedDate);
+            localStorage.setItem('range', selectedRange);
+
+            // Перенаправляем на about-page
+            window.location.href = 'about-page.html';
+        });
+    });
 </script>
 
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const datePicker = document.getElementById('datePicker');
-            const rangeSelect = document.getElementById('rangeSelect');
-            const applyButton = document.getElementById('applyButton');
-            const modalTableBody = document.getElementById('modalTableBody');
 
-
-            // Обработчик клика для карточки "Активные окна"
-            document.getElementById('activeWindowsCard').addEventListener('click', function() {
-                openModal([
-                    { window: 1, operator: 'Холмогорова', filial: 'МФЦ “Кыра”', status: 'Нет на месте' },
-                    { window: 2, operator: 'Патрина', filial: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
-                ]);
-            });
-
-            // Обработчик клика для карточки "Действующие окна"
-            document.getElementById('activeSessionsCard').addEventListener('click', function() {
-                openModal([
-                    { window: 1, operator: 'Холмогорова', filial: 'МФЦ “Кыра”', status: 'Обслуживает' },
-                    { window: 2, operator: 'Патрина', filial: 'МФЦ “Газ-Завод”', status: 'Обслуживает' }
-                ]);
-            });
-
-            // Функция для открытия модального окна и заполнения данными
-            function openModal(data) {
-                modalTableBody.innerHTML = ''; // Очищаем предыдущие данные
-                data.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${item.window_number}</td>  <!-- Изменено на window_number -->
-                        <td>${item.operator}</td>
-                        <td>${item.filial}</td>
-                        <td>${item.status}</td>
-                    `;
-                    modalTableBody.appendChild(row);
-                });
-                // Показываем модальное окно
-                const modal = new bootstrap.Modal(document.getElementById('dataModal'));
-                modal.show();
-            }
-
-            // Обработчик изменения для выбора даты и диапазона
-            datePicker.addEventListener('change', checkButtonState);
-            rangeSelect.addEventListener('change', checkButtonState);
-
-            function checkButtonState() {
-                if (datePicker.value && rangeSelect.value) {
-                    applyButton.disabled = false;
-                } else {
-                    applyButton.disabled = true;
-                }
-            }
-
-            // Обработчик клика на кнопку "Применить"
-            applyButton.addEventListener('click', function() {
-                const selectedDate = datePicker.value;
-                const selectedRange = rangeSelect.value;
-
-                console.log(selectedFilial);
-                console.log(selectedDate);
-                console.log(selectedRange);
-
-                // Отправляем данные на сервер
-                socket.send(JSON.stringify({
-                    action: 'apply',
-                    filial: selectedFilial,
-                    date: selectedDate,
-                    range: selectedRange
-                }));
-
-                // Закрываем модальное окно
-                const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal-1'));
-                modal.hide();
-
-                // Сохраняем данные в localStorage
-                localStorage.setItem('filial', selectedFilial);
-                localStorage.setItem('date', selectedDate);
-                localStorage.setItem('range', selectedRange);
-
-                // Перенаправляем на about-page
-                window.location.href = 'about-page.html';
-            });
-        });
-    </script>
 
 
 </body>

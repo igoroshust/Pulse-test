@@ -60,9 +60,9 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 FROM window w
                 JOIN department d ON w.department_id = d.id
                 LEFT JOIN seans s ON s.unit_id = d.unit_id
-                WHERE s.serv_day = date('now') AND s.status_id = 1 AND s.start_wait_time IS NOT NULL
+                -- WHERE s.serv_day = date('now') AND s.status_id = 1 AND s.start_wait_time IS NOT NULL
                 GROUP BY d.name, w.number, s.fio
-                HAVING AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) > 0
+                -- HAVING AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) > 0
                 ORDER BY d.name;
                 """
                 cursor.execute(query)
@@ -71,6 +71,39 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 # Преобразуем данные в список словарей
                 result = [dict(zip(columns, row)) for row in data]
                 return result
+
+        except Exception as e:
+            return {'error': str(e)}
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+
+        if data.get('action') == 'get_active_branches':
+            # Получаем данные о филиалах с активными окнами
+            active_branches = await self.get_active_branches()
+            await self.send(text_data=json.dumps({'action': 'get_active_branches', 'data': active_branches}))
+
+    @database_sync_to_async
+    def get_active_branches(self):
+        """Получение данных о филиалах с активными окнами"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                SELECT 
+                    d.name AS filial_name, 
+                    w.number AS window_number,
+                    s.fio AS fio
+                FROM window w
+                JOIN department d ON w.department_id = d.id
+                JOIN seans s ON s.unit_id = d.unit_id
+                WHERE w.active = 1 AND w.deleted = 0
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+
         except Exception as e:
             return {'error': str(e)}
 

@@ -23,6 +23,7 @@
     <script defer src="js/datatables-simple-demo.js"></script>
     <script defer src="js/scripts.js"></script>
 </head>
+
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <a class="navbar-brand ps-3" href="index.html">Pulse</a>
@@ -296,7 +297,7 @@
 
         data.data.forEach(item => {
             // Проверяем, существует ли уже строка с таким филиалом
-            let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === item.filial);
+            let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === item.filial_name);
 
             if (existingRow) {
                 // Обновляем существующую строку
@@ -349,24 +350,38 @@
         console.log('Соединение закрыто', event);
     };
 
+
     // Функция для открытия модального окна и заполнения данными
     function openModal(data) {
         const modalTableBody = document.getElementById('modalTableBody');
         modalTableBody.innerHTML = ''; // Очищаем предыдущие данные
+        const uniqueRecords = {};
+
         data.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${item.window_number}</td>
-                <td>${item.fio || 'Неизвестно'}</td> <!-- Добавьте логику для оператора, если нужно -->
-                <td>${item.filial_name}</td>
-                <td>${item.status || 'Неизвестно'}</td> <!-- Добавьте логику для статуса, если нужно -->
-            `;
-            modalTableBody.appendChild(row);
+            // Создаем уникальный ключ на основе значений
+            const uniqueKey = `${item.window_number}-${item.fio || 'Неизвестно'}-${item.filial_name}`;
+
+            // Проверяем, существует ли уже запись с таким уникальным ключом
+            if (!uniqueRecords[uniqueKey]) {
+                uniqueRecords[uniqueKey] = item; // Сохраняем уникальную запись
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.window_number}</td>
+                    <td>${item.fio || 'Неизвестно'}</td>
+                    <td>${item.filial_name}</td>
+                    <td>${item.status || 'Неизвестно'}</td>
+                `;
+
+                modalTableBody.appendChild(row);
+            }
         });
-        // Показываем модальное окно
-        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
-        modal.show();
-    }
+
+    // Показываем модальное окно
+    const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+    modal.show();
+}
+
 
     // Функция для привязки обработчиков событий к ячейкам с классом branch-name
     let selectedFilial = '';

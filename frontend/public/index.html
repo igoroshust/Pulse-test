@@ -180,12 +180,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+
                                     </tr>
                                 </tbody>
                             </table>
@@ -274,6 +269,7 @@
 
 <script>
     const socket = new WebSocket('ws://localhost:5050/ws/information_updates/');
+    let dataTable; // Переменная для хранения экземпляра DataTable
 
     socket.onopen = function() {
         console.log('Соединение установлено! (Main)');
@@ -290,42 +286,29 @@
         }
 
         const tableBody = document.querySelector('#datatablesSimple tbody');
+        tableBody.innerHTML = ''; // Очищаем предыдущие данные
 
         let totalActiveWindows = 0; // Переменная для хранения суммы active_windows
         let totalFactActiveWindows = 0; // Переменная для хранения суммы fact_active_windows
         let totalDifferenceInMinutes = 0; // Переменная для хранения суммы difference_in_minutes
 
         data.data.forEach(item => {
-            // Проверяем, существует ли уже строка с таким филиалом
-            let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === item.filial_name);
-
-            if (existingRow) {
-                // Обновляем существующую строку
-                existingRow.cells[1].textContent = item.filial_name;
-                existingRow.cells[2].textContent = item.active_windows_count;
-                existingRow.cells[3].textContent = item.fact_active_windows_count;
-                existingRow.cells[4].textContent = item.inactive_windows;
-                existingRow.cells[5].textContent = item.deep_recording;
-                existingRow.cells[6].textContent = item.difference_in_minutes;
-            } else {
-                // Если строки нет, добавляем новую
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="branch-name">${item.filial_name}</td>
-                    <td>${item.active_windows_count}</td>
-                    <td>${item.fact_active_windows_count}</td>
-                    <td>${item.inactive_windows}</td>
-                    <td>${item.deep_recording}</td>
-                    <td>${item.difference_in_minutes} минут</td>
-                `;
-                tableBody.appendChild(row);
-            }
+            // Добавляем новую строку
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="branch-name">${item.filial_name}</td>
+                <td>${item.active_windows_count}</td>
+                <td>${item.fact_active_windows_count}</td>
+                <td>${item.inactive_windows}</td>
+                <td>${item.deep_recording}</td>
+                <td>${item.difference_in_minutes} минут</td>
+            `;
+            tableBody.appendChild(row);
 
             // Суммируем значения
             totalActiveWindows += item.active_windows_count;
             totalFactActiveWindows += item.fact_active_windows_count;
             totalDifferenceInMinutes += item.difference_in_minutes;
-
         });
 
         // Обновляем значения в карточках
@@ -336,9 +319,58 @@
         // Привязываем обработчики событий к новым ячейкам
         attachBranchClickHandlers();
 
-        // Обработка данных о филиалах с активными окнами
-        if (data.action === 'get_active_branches' || data.action === 'get_fact_active_windows') {
-            openModal(data.data);
+                    // Инициализация DataTable
+        dataTable = new simpleDatatables.DataTable("#datatablesSimple");
+
+        // Обработчик изменения для выбора даты и диапазона
+        datePicker.addEventListener('change', checkButtonState);
+        rangeSelect.addEventListener('change', checkButtonState);
+
+        function checkButtonState() {
+            if (datePicker.value && rangeSelect.value) {
+                applyButton.disabled = false;
+            } else {
+                applyButton.disabled = true;
+            }
+        }
+
+
+        // Обработчик клика на кнопку "Применить"
+        applyButton.addEventListener('click', function() {
+            const selectedDate = datePicker.value;
+            const selectedRange = rangeSelect.value;
+
+            console.log(selectedFilial);
+            console.log(selectedDate);
+            console.log(selectedRange);
+
+            // Отправляем данные на сервер
+            socket.send(JSON.stringify({
+                action: 'apply',
+                filial: selectedFilial,
+                date: selectedDate,
+                range: selectedRange
+            }));
+
+            // Закрываем модальное окно
+            const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal-1'));
+            modal.hide();
+
+
+            // Сохраняем данные в localStorage
+            localStorage.setItem('filial', selectedFilial);
+            localStorage.setItem('date', selectedDate);
+            localStorage.setItem('range', selectedRange);
+
+            // Перенаправляем на about-page
+            window.location.href = 'about-page.html';
+        });
+
+        // Обновляем DataTable
+        if (dataTable) {
+            dataTable.update(); // Обновляем существующий экземпляр DataTable
+        } else {
+            dataTable = new simpleDatatables.DataTable("#datatablesSimple"); // Инициализируем DataTable, если он еще не инициализирован
         }
     };
 
@@ -349,7 +381,6 @@
     socket.onclose = function(event) {
         console.log('Соединение закрыто', event);
     };
-
 
     // Функция для открытия модального окна и заполнения данными
     function openModal(data) {
@@ -377,11 +408,10 @@
             }
         });
 
-    // Показываем модальное окно
-    const modal = new bootstrap.Modal(document.getElementById('dataModal'));
-    modal.show();
-}
-
+        // Показываем модальное окно
+        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+        modal.show();
+    }
 
     // Функция для привязки обработчиков событий к ячейкам с классом branch-name
     let selectedFilial = '';
@@ -405,6 +435,7 @@
         const rangeSelect = document.getElementById('rangeSelect');
         const applyButton = document.getElementById('applyButton');
 
+
         // Обработчик клика для карточки "Активные окна"
         document.getElementById('activeWindowsCard').addEventListener('click', function() {
             // Отправляем запрос на получение активных филиалов
@@ -413,53 +444,12 @@
 
         // Обработчик клика для карточки "Действующие окна"
         document.getElementById('activeSessionsCard').addEventListener('click', function() {
-           // Отправляем запрос на получение активных филиалов
+            // Отправляем запрос на получение активных филиалов
             socket.send(JSON.stringify({ action: 'get_fact_active_windows' }));
-        });
-
-        // Обработчик изменения для выбора даты и диапазона
-        datePicker.addEventListener('change', checkButtonState);
-        rangeSelect.addEventListener('change', checkButtonState);
-
-        function checkButtonState() {
-            if (datePicker.value && rangeSelect.value) {
-                applyButton.disabled = false;
-            } else {
-                applyButton.disabled = true;
-            }
-        }
-
-        // Обработчик клика на кнопку "Применить"
-        applyButton.addEventListener('click', function() {
-            const selectedDate = datePicker.value;
-            const selectedRange = rangeSelect.value;
-
-            console.log(selectedFilial);
-            console.log(selectedDate);
-            console.log(selectedRange);
-
-            // Отправляем данные на сервер
-            socket.send(JSON.stringify({
-                action: 'apply',
-                filial: selectedFilial,
-                date: selectedDate,
-                range: selectedRange
-            }));
-
-            // Закрываем модальное окно
-            const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal-1'));
-            modal.hide();
-
-            // Сохраняем данные в localStorage
-            localStorage.setItem('filial', selectedFilial);
-            localStorage.setItem('date', selectedDate);
-            localStorage.setItem('range', selectedRange);
-
-            // Перенаправляем на about-page
-            window.location.href = 'about-page.html';
         });
     });
 </script>
+
 
 
 

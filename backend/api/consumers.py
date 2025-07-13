@@ -14,7 +14,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.channel_layer.group_add("information_updates", self.channel_name)
 
-        # Отправляем начальные данные
+        # Отправляем начальные данные для таблицы
         initial_data = await self.get_data()
         await self.send(text_data=json.dumps({'data': initial_data}))
 
@@ -76,7 +76,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             return {'error': str(e)}
 
     @database_sync_to_async
-    def get_active_branches(self):
+    def get_active_windows(self):
         """Активные окна"""
         try:
             with connections['test'].cursor() as cursor:
@@ -99,11 +99,9 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             return {'error': str(e)}
 
-
     @database_sync_to_async
     def get_fact_active_windows(self):
         """Действующие окна"""
-
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -125,15 +123,14 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             return {'error': str(e)}
 
-
     async def receive(self, text_data):
         """Обработка полученных от сервера данных"""
         data = json.loads(text_data)
 
-        if data.get('action') == 'get_active_branches':
+        if data.get('action') == 'get_active_windows':
             # Получаем данные об активных окнах
-            active_branches = await self.get_active_branches()
-            await self.send(text_data=json.dumps({'action': 'get_active_branches', 'data': active_branches}))
+            active_windows = await self.get_active_windows()
+            await self.send(text_data=json.dumps({'action': 'get_active_windows', 'data': active_windows}))
 
         if data.get('action') == 'get_fact_active_windows':
             # Получаем данные о действующих окнах
@@ -144,10 +141,12 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 class AboutPageConsumer(AsyncWebsocketConsumer):
     """Потребитель для страницы about-page"""
     async def connect(self):
+        """Подключение"""
         await self.accept()
         await self.channel_layer.group_add('about_page_updates', self.channel_name)
 
-    async def disconnect(self, close_code):  # Добавляем аргумент close_code
+    async def disconnect(self, close_code):
+        """Отключение"""
         await self.channel_layer.group_discard('about_page_updates', self.channel_name)
 
     async def receive(self, text_data):
@@ -172,6 +171,7 @@ class AboutPageConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_about_page_data(self, filial, date, range):
+        """Данные для страницы about-page (заготовка)"""
         try:
             with connections['test'].cursor() as cursor:
                 query = "SELECT * FROM eo WHERE filial = %s AND date = %s AND range = %s"
@@ -185,88 +185,3 @@ class AboutPageConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             return {'Error': str(e)}
-
-
-
-
-# CREATE TABLE talon (
-#     id INTEGER PRIMARY KEY,
-#     serv_day DATE,
-#     status_id INTEGER,
-#     unit_id INTEGER,
-#     talon_type_id INTEGER,
-#     service_id INTEGER,
-#     count_service INTEGER,
-#     prefix VARCHAR(500),
-#     number INTEGER,
-#     full_number INTEGER,
-#     pin BIGINT,
-#     priority INTEGER,
-#     reserve_time TIMESTAMP,
-#     fio VARCHAR(500),
-#     snils VARCHAR(500),
-#     arrival_time TIMESTAMP,
-#     cancellation_time TIMESTAMP,
-#     book_id INTEGER,
-#     mobile_phone BIGINT,
-#     snils_check_id INTEGER,
-#     source VARCHAR(1000),
-#     activation_source VARCHAR(500),
-#     life_situation_id INTEGER,
-#     live_situation_time_service TIMESTAMP,
-#     card_data VARCHAR(500),
-#     book_from VARCHAR(500),
-#     email VARCHAR(500),
-#     notes VARCHAR(500),
-#     source_type VARCHAR(500),
-#     vk_notified INTEGER
-# );
-
-
-# CREATE TABLE work_time (
-#     id INTEGER PRIMARY KEY,
-#     unit_id INTEGER,
-#     description VARCHAR(500),
-#     mon INTEGER DEFAULT 0,
-#     tue INTEGER DEFAULT 0,
-#     thu INTEGER DEFAULT 0,
-#     fri INTEGER DEFAULT 0,
-#     sat INTEGER DEFAULT 0,
-#     sun INTEGER DEFAULT 0,
-#     temp INTEGER DEFAULT 0,
-#     mon_prerecord_factor INTEGER,
-#     tue_prerecord_factor INTEGER,
-#     thu_prerecord_factor INTEGER,
-#     fri_prerecord_factor INTEGER,
-#     sat_prerecord_factor INTEGER,
-#     sun_prerecord_factor INTEGER,
-#     prf INTEGER DEFAULT 0,
-#     prf_work_time_id INTEGER,
-#     type INTEGER DEFAULT 0
-# );
-
-
-# CREATE TABLE work_time_range (
-#     id INTEGER PRIMARY KEY,
-#     time_from TIME,
-#     time_to TIME,
-#     date DATE,
-#     description VARCHAR(500),
-#     holiday INTEGER,
-#     mon INTEGER,
-#     tue INTEGER,
-#     wed INTEGER,
-#     thu INTEGER,
-#     fri INTEGER,
-#     sat INTEGER,
-#     sun INTEGER,
-#     day INTEGER,
-#     month INTGER,
-#     year INTEGER,
-#     unit_id INTEGER,
-#     comment VARCHAR(500),
-#     prerecord_factor VARCHAR(500),
-#     time_service_prerecord VARCHAR(500),
-#     prerecord_amount_limit VARCHAR(500),
-#     prerecord_window_limit VARCHAR(500)
-# );

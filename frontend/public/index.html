@@ -180,7 +180,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-
+                                        <!-- Добавляем данные через JS -->
                                     </tr>
                                 </tbody>
                             </table>
@@ -203,7 +203,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно -->
+    <!-- Модальное окно для блоков на главной странице (активные окна и т.д.) -->
     <div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -222,7 +222,7 @@
                             </tr>
                         </thead>
                         <tbody id="modalTableBody">
-                            <!-- Данные будут добавлены здесь через JavaScript -->
+                            <!-- Добавляем данные через JS -->
                         </tbody>
                     </table>
                 </div>
@@ -233,7 +233,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно -->
+    <!-- Модальное окно для филиала (выбор даты и диапазона) -->
     <div class="modal fade" id="dataModal-1" tabindex="-1" aria-labelledby="dataModalLabel-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -280,7 +280,8 @@
         const data = JSON.parse(event.data);
         console.log('Полученные данные:', data);
 
-        if (data.action === 'get_active_branches' || data.action === 'get_fact_active_windows') {
+        // Информация в модальных окнах по блокам (перечисляем методы из MainPageConsumer)
+        if (data.action === 'get_active_windows' || data.action === 'get_fact_active_windows') {
             openModal(data.data);
             return;
         }
@@ -300,7 +301,7 @@
                 <td>${item.active_windows_count}</td>
                 <td>${item.fact_active_windows_count}</td>
                 <td>${item.inactive_windows}</td>
-                <td>${item.deep_recording}</td>
+                <td>${item.deep_recording || 'Неизвестно'}</td>
                 <td>${item.difference_in_minutes} минут</td>
             `;
             tableBody.appendChild(row);
@@ -319,21 +320,21 @@
         // Привязываем обработчики событий к новым ячейкам
         attachBranchClickHandlers();
 
-                    // Инициализация DataTable
+        // Инициализация DataTable (нужно для подгрузки скриптов/стилей для таблицы после получения данных с базы)
         dataTable = new simpleDatatables.DataTable("#datatablesSimple");
 
         // Обработчик изменения для выбора даты и диапазона
         datePicker.addEventListener('change', checkButtonState);
         rangeSelect.addEventListener('change', checkButtonState);
 
+        // Валидация для кнопки "Применить"
         function checkButtonState() {
             if (datePicker.value && rangeSelect.value) {
                 applyButton.disabled = false;
             } else {
                 applyButton.disabled = true;
             }
-        }
-
+        };
 
         // Обработчик клика на кнопку "Применить"
         applyButton.addEventListener('click', function() {
@@ -370,7 +371,7 @@
         if (dataTable) {
             dataTable.update(); // Обновляем существующий экземпляр DataTable
         } else {
-            dataTable = new simpleDatatables.DataTable("#datatablesSimple"); // Инициализируем DataTable, если он еще не инициализирован
+            dataTable = new simpleDatatables.DataTable("#datatablesSimple"); // Инициализируем DataTable
         }
     };
 
@@ -386,7 +387,7 @@
     function openModal(data) {
         const modalTableBody = document.getElementById('modalTableBody');
         modalTableBody.innerHTML = ''; // Очищаем предыдущие данные
-        const uniqueRecords = {};
+        const uniqueRecords = {}; // Уникальные записи в модальных окнах
 
         data.forEach(item => {
             // Создаем уникальный ключ на основе значений
@@ -403,7 +404,6 @@
                     <td>${item.filial_name}</td>
                     <td>${item.status || 'Неизвестно'}</td>
                 `;
-
                 modalTableBody.appendChild(row);
             }
         });
@@ -413,9 +413,10 @@
         modal.show();
     }
 
-    // Функция для привязки обработчиков событий к ячейкам с классом branch-name
+    // Сохраняем выбранный пользователем филиал
     let selectedFilial = '';
 
+    // Функция для привязки обработчиков событий к ячейкам с классом branch-name
     function attachBranchClickHandlers() {
         const filialCells = document.querySelectorAll('.branch-name');
         filialCells.forEach(cell => {
@@ -435,26 +436,17 @@
         const rangeSelect = document.getElementById('rangeSelect');
         const applyButton = document.getElementById('applyButton');
 
-
         // Обработчик клика для карточки "Активные окна"
         document.getElementById('activeWindowsCard').addEventListener('click', function() {
-            // Отправляем запрос на получение активных филиалов
-            socket.send(JSON.stringify({ action: 'get_active_branches' }));
+            socket.send(JSON.stringify({ action: 'get_active_windows' })); // Запрос на получение активных окон
         });
 
         // Обработчик клика для карточки "Действующие окна"
         document.getElementById('activeSessionsCard').addEventListener('click', function() {
-            // Отправляем запрос на получение активных филиалов
-            socket.send(JSON.stringify({ action: 'get_fact_active_windows' }));
+            socket.send(JSON.stringify({ action: 'get_fact_active_windows' })); // Запрос на получение действующих окон
         });
     });
 </script>
-
-
-
-
-
-
 
 </body>
 </html>

@@ -319,14 +319,10 @@
         tableBody.appendChild(row);
     }
 
-    // Суммируем значения только для новых записей из таблицы window
-    if (item.source === 'window') { // Предполагается, что вы добавите поле source в ответ
         totalActiveWindows += item.active_windows_count;
         totalFactActiveWindows += item.fact_active_windows_count;
         totalDelayByWindows += item.delay_by_windows;
-    }
 });
-
 
         // Обновляем значения в карточках
         document.querySelector('#activeWindowsCard a').textContent = totalActiveWindows;

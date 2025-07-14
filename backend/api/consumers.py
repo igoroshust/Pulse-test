@@ -57,9 +57,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
                     (COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) - 
                      COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END)) AS delay_by_windows,
-                    AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) AS difference_in_minutes,
-                    s.fio,
-                    'window' AS source  -- Добавлено поле source
+                    AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) AS difference_in_minutes
                 FROM 
                     window w
                 JOIN 
@@ -67,7 +65,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 LEFT JOIN 
                     seans s ON s.unit_id = d.unit_id
                 GROUP BY 
-                    d.name, s.fio
+                    d.name
                 HAVING 
                     AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) > 0
                 ORDER BY 
@@ -93,10 +91,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 SELECT 
                     d.name AS filial_name, 
                     w.number AS window_number,
-                    s.fio AS fio
+                    u.last_name AS fio
                 FROM window w
                 JOIN department d ON w.department_id = d.id
-                JOIN seans s ON s.unit_id = d.unit_id
+                JOIN user u ON u.id = w.user_id
                 WHERE w.active = 1 AND w.deleted = 0
                 """
                 cursor.execute(query)
@@ -118,10 +116,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 SELECT 
                     d.name AS filial_name, 
                     w.number AS window_number,
-                    s.fio AS fio
+                    u.last_name AS fio
                 FROM window w
                 JOIN department d ON w.department_id = d.id
-                JOIN seans s ON s.unit_id = d.unit_id
+                JOIN user u ON u.id = w.user_id
                 WHERE w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0
                 """
                 cursor.execute(query)
@@ -144,10 +142,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 SELECT
                     d.name AS filial_name,
                     w.number AS window_number,
-                    s.fio AS fio
+                    u.last_name AS fio
                 FROM window w
                 JOIN department d ON w.department_id = d.id
-                JOIN seans s ON s.unit_id = d.unit_id
+                JOIN user u ON u.id = w.user_id
                 WHERE w.active = 1 AND w.paused = 0 AND w.online = 0 AND w.deleted = 0
                 """
                 cursor.execute(query)

@@ -52,22 +52,22 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 query = """
                 SELECT 
                     d.name AS filial_name,
-                    w.number AS window_number,
                     COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) AS active_windows_count,
                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
                     (COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) - 
                      COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END)) AS delay_by_windows,
-                    AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) AS difference_in_minutes
+                    COALESCE(AVG(s.avg_wait_time), 'Неизвестно') AS difference_in_minutes
                 FROM 
                     window w
                 JOIN 
                     department d ON w.department_id = d.id
                 LEFT JOIN 
-                    seans s ON s.unit_id = d.unit_id
+                    (SELECT unit_id, AVG((strftime('%s', 'now', '+9 hours') - strftime('%s', start_wait_time)) / 60) AS avg_wait_time
+                     FROM seans
+                     WHERE start_wait_time IS NOT NULL
+                     GROUP BY unit_id) s ON s.unit_id = d.unit_id
                 GROUP BY 
                     d.name
-                HAVING 
-                    AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) > 0
                 ORDER BY 
                     d.name;
                 """

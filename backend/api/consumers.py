@@ -50,26 +50,35 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             with connections['test'].cursor() as cursor:
                 # Запрос для получения названий филиалов, количества активных окон и фактических активных окон
                 query = """
-                SELECT d.name AS filial_name,
-                       w.number AS window_number,
-                       COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) AS active_windows_count,
-                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
-                       COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 0 AND w.deleted = 0 THEN 1 END) AS inactive_windows,
-                       AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) AS difference_in_minutes,
-                       s.fio
-                FROM window w
-                JOIN department d ON w.department_id = d.id
-                LEFT JOIN seans s ON s.unit_id = d.unit_id
-                -- WHERE s.serv_day = date('now') AND s.status_id = 1 AND s.start_wait_time IS NOT NULL
-                GROUP BY d.name, w.number, s.fio
-                -- HAVING AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) > 0
-                ORDER BY d.name;
+                SELECT 
+                    d.name AS filial_name,
+                    w.number AS window_number,
+                    COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) AS active_windows_count,
+                    COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
+                    (COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) - 
+                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END)) AS delay_by_windows,
+                    AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) AS difference_in_minutes,
+                    s.fio,
+                    'window' AS source  -- Добавлено поле source
+                FROM 
+                    window w
+                JOIN 
+                    department d ON w.department_id = d.id
+                LEFT JOIN 
+                    seans s ON s.unit_id = d.unit_id
+                GROUP BY 
+                    d.name, s.fio
+                HAVING 
+                    AVG(COALESCE((strftime('%s', 'now', '+9 hours') - strftime('%s', s.start_wait_time)) / 60, 0)) > 0
+                ORDER BY 
+                    d.name;
                 """
                 cursor.execute(query)
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
                 # Преобразуем данные в список словарей
                 result = [dict(zip(columns, row)) for row in data]
+
                 return result
 
         except Exception as e:
@@ -94,6 +103,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
                 result = [dict(zip(columns, row)) for row in data]
+
                 return result
 
         except Exception as e:
@@ -118,10 +128,38 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
                 result = [dict(zip(columns, row)) for row in data]
+
                 return result
 
         except Exception as e:
             return {'error': str(e)}
+
+
+    @database_sync_to_async
+    def get_delay_by_windows(self):
+        """Простой по окнам"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                SELECT
+                    d.name AS filial_name,
+                    w.number AS window_number,
+                    s.fio AS fio
+                FROM window w
+                JOIN department d ON w.department_id = d.id
+                JOIN seans s ON s.unit_id = d.unit_id
+                WHERE w.active = 1 AND w.paused = 0 AND w.online = 0 AND w.deleted = 0
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+
+                return result
+
+        except Exception as e:
+            return {'error': str(e)}
+
 
     async def receive(self, text_data):
         """Обработка полученных от сервера данных"""
@@ -136,6 +174,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             # Получаем данные о действующих окнах
             fact_active_windows = await self.get_fact_active_windows()
             await self.send(text_data=json.dumps({'action': 'get_fact_active_windows', 'data': fact_active_windows}))
+
+        if data.get('action') == 'get_delay_by_windows':
+            windows_delay = await self.get_delay_by_windows()
+            await self.send(text_data=json.dumps({'action': 'get_delay_by_windows', 'data': windows_delay}))
 
 
 class AboutPageConsumer(AsyncWebsocketConsumer):

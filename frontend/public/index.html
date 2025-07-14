@@ -128,7 +128,7 @@
                             <div class="card bg-primary text-white mb-4">
                                 <div class="card-body">Глубина записи по талонам</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <a class="small text-white stretched-link" href="#">0</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
@@ -137,7 +137,7 @@
                             <div class="card bg-warning text-white mb-4" id="activeWindowsCard">
                                 <div class="card-body">Активные окна</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <a class="small text-white stretched-link" href="#">0</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
@@ -146,16 +146,16 @@
                             <div class="card bg-danger text-white mb-4" id="activeSessionsCard">
                                 <div class="card-body">Действующие окна</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <a class="small text-white stretched-link" href="#">0</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xl-3 col-md-6">
-                            <div class="card bg-success text-white mb-4" id="differenceInMinutes">
-                                <div class="card-body">Ожидание по талону</div>
+                            <div class="card bg-success text-white mb-4" id="delayByWindows">
+                                <div class="card-body">Простой по окнам</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">30</a>
+                                    <a class="small text-white stretched-link" href="#">0</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
@@ -173,7 +173,7 @@
                                         <th>Филиал</th>
                                         <th>Активные окна</th>
                                         <th>Действующие окна</th>
-                                        <th>Неактивные окна</th>
+                                        <th>Простой по окнам</th>
                                         <th>Глубина записи по талону</th>
                                         <th>Среднее время ожидания</th>
                                     </tr>
@@ -268,7 +268,7 @@
     </div>
 
 <script>
-    const socket = new WebSocket('ws://localhost:5050/ws/information_updates/');
+    const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
     let dataTable; // Переменная для хранения экземпляра DataTable
 
     socket.onopen = function() {
@@ -281,7 +281,9 @@
         console.log('Полученные данные:', data);
 
         // Информация в модальных окнах по блокам (перечисляем методы из MainPageConsumer)
-        if (data.action === 'get_active_windows' || data.action === 'get_fact_active_windows') {
+        if (data.action === 'get_active_windows' ||
+        data.action === 'get_fact_active_windows' ||
+        data.action === 'get_delay_by_windows') {
             openModal(data.data);
             return;
         }
@@ -291,31 +293,45 @@
 
         let totalActiveWindows = 0; // Переменная для хранения суммы active_windows
         let totalFactActiveWindows = 0; // Переменная для хранения суммы fact_active_windows
-        let totalDifferenceInMinutes = 0; // Переменная для хранения суммы difference_in_minutes
+        let totalDelayByWindows = 0; // Переменная для хранения суммы delay_by_windows
 
         data.data.forEach(item => {
-            // Добавляем новую строку
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="branch-name">${item.filial_name}</td>
-                <td>${item.active_windows_count}</td>
-                <td>${item.fact_active_windows_count}</td>
-                <td>${item.inactive_windows}</td>
-                <td>${item.deep_recording || 'Неизвестно'}</td>
-                <td>${item.difference_in_minutes} минут</td>
-            `;
-            tableBody.appendChild(row);
+    let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === item.filial_name);
 
-            // Суммируем значения
-            totalActiveWindows += item.active_windows_count;
-            totalFactActiveWindows += item.fact_active_windows_count;
-            totalDifferenceInMinutes += item.difference_in_minutes;
-        });
+    if (existingRow) {
+        // Обновляем существующую строку
+        existingRow.cells[1].textContent = item.active_windows_count;
+        existingRow.cells[2].textContent = item.fact_active_windows_count;
+        existingRow.cells[3].textContent = item.delay_by_windows;
+        existingRow.cells[4].textContent = item.deep_recording || 'Неизвестно';
+        existingRow.cells[5].textContent = item.difference_in_minutes + ' минут';
+    } else {
+        // Добавляем новую строку
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="branch-name">${item.filial_name}</td>
+            <td>${item.active_windows_count}</td>
+            <td>${item.fact_active_windows_count}</td>
+            <td>${item.delay_by_windows}</td>
+            <td>${item.deep_recording || 'Неизвестно'}</td>
+            <td>${item.difference_in_minutes} минут</td>
+        `;
+        tableBody.appendChild(row);
+    }
+
+    // Суммируем значения только для новых записей из таблицы window
+    if (item.source === 'window') { // Предполагается, что вы добавите поле source в ответ
+        totalActiveWindows += item.active_windows_count;
+        totalFactActiveWindows += item.fact_active_windows_count;
+        totalDelayByWindows += item.delay_by_windows;
+    }
+});
+
 
         // Обновляем значения в карточках
         document.querySelector('#activeWindowsCard a').textContent = totalActiveWindows;
         document.querySelector('#activeSessionsCard a').textContent = totalFactActiveWindows;
-        document.querySelector('#differenceInMinutes a').textContent = totalDifferenceInMinutes + ' минут';
+        document.querySelector('#delayByWindows a').textContent = totalDelayByWindows;
 
         // Привязываем обработчики событий к новым ячейкам
         attachBranchClickHandlers();
@@ -432,9 +448,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const datePicker = document.getElementById('datePicker');
-        const rangeSelect = document.getElementById('rangeSelect');
-        const applyButton = document.getElementById('applyButton');
+        const datePicker = document.getElementById('datePicker'); // Выбор даты
+        const rangeSelect = document.getElementById('rangeSelect'); // Выбор диапазона
+        const applyButton = document.getElementById('applyButton'); // Кнопка "Применить"
 
         // Обработчик клика для карточки "Активные окна"
         document.getElementById('activeWindowsCard').addEventListener('click', function() {
@@ -444,6 +460,11 @@
         // Обработчик клика для карточки "Действующие окна"
         document.getElementById('activeSessionsCard').addEventListener('click', function() {
             socket.send(JSON.stringify({ action: 'get_fact_active_windows' })); // Запрос на получение действующих окон
+        });
+
+        // Обработчик клика для карточки "Простой по окнам"
+        document.getElementById('delayByWindows').addEventListener('click', function() {
+            socket.send(JSON.stringify({ action: 'get_delay_by_windows' })); // Запрос на получение действующих окон
         });
     });
 </script>

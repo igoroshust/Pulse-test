@@ -296,33 +296,35 @@
         let totalDelayByWindows = 0; // Переменная для хранения суммы delay_by_windows
 
         data.data.forEach(item => {
-    let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === item.filial_name);
+            // Проверяем, есть ли филиал в таблице
+            let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === item.filial_name);
 
-    if (existingRow) {
-        // Обновляем существующую строку
-        existingRow.cells[1].textContent = item.active_windows_count;
-        existingRow.cells[2].textContent = item.fact_active_windows_count;
-        existingRow.cells[3].textContent = item.delay_by_windows;
-        existingRow.cells[4].textContent = item.deep_recording || 'Неизвестно';
-        existingRow.cells[5].textContent = item.difference_in_minutes + ' минут';
-    } else {
-        // Добавляем новую строку
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="branch-name">${item.filial_name}</td>
-            <td>${item.active_windows_count}</td>
-            <td>${item.fact_active_windows_count}</td>
-            <td>${item.delay_by_windows}</td>
-            <td>${item.deep_recording || 'Неизвестно'}</td>
-            <td>${item.difference_in_minutes} минут</td>
-        `;
-        tableBody.appendChild(row);
-    }
+            if (existingRow) {
+                // Обновляем существующую строку
+                existingRow.cells[1].textContent = item.active_windows_count;
+                existingRow.cells[2].textContent = item.fact_active_windows_count;
+                existingRow.cells[3].textContent = item.delay_by_windows;
+                existingRow.cells[4].textContent = item.deep_recording || 'Неизвестно';
+                existingRow.cells[5].textContent = item.difference_in_minutes + ' минут';
+            } else {
+                // Добавляем новую строку
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="branch-name">${item.filial_name}</td>
+                    <td>${item.active_windows_count}</td>
+                    <td>${item.fact_active_windows_count}</td>
+                    <td>${item.delay_by_windows}</td>
+                    <td>${item.deep_recording || 'Неизвестно'}</td>
+                    <td>${item.difference_in_minutes} минут</td>
+                `;
+                tableBody.appendChild(row);
+            }
 
-        totalActiveWindows += item.active_windows_count;
-        totalFactActiveWindows += item.fact_active_windows_count;
-        totalDelayByWindows += item.delay_by_windows;
-});
+                // Обновляем цифру с общей информацией по окнам
+                totalActiveWindows += item.active_windows_count;
+                totalFactActiveWindows += item.fact_active_windows_count;
+                totalDelayByWindows += item.delay_by_windows;
+        });
 
         // Обновляем значения в карточках
         document.querySelector('#activeWindowsCard a').textContent = totalActiveWindows;

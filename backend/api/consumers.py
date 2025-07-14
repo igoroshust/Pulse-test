@@ -54,9 +54,9 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     d.name AS filial_name,
                     COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) AS active_windows_count,
                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
-                    (COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) - 
-                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END)) AS delay_by_windows,
-                    COALESCE(AVG(s.avg_wait_time), 'Неизвестно') AS difference_in_minutes
+                    COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) - 
+                    COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS delay_by_windows,
+                    COALESCE(s.avg_wait_time, 'Неизвестно') AS difference_in_minutes
                 FROM 
                     window w
                 JOIN 

@@ -88,14 +88,42 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         try:
             with connections['test'].cursor() as cursor:
                 query = """
+                WITH time_intervals AS (
+                    SELECT 
+                        w.id AS window_id,
+                        wh.date AS event_date,
+                        wh.event_type_id,
+                        LEAD(wh.date) OVER (PARTITION BY w.id ORDER BY wh.date) AS next_event_date,
+                        LEAD(wh.event_type_id) OVER (PARTITION BY w.id ORDER BY wh.date) AS next_event_type
+                    FROM 
+                        window w
+                    JOIN 
+                        win_history wh ON w.id = wh.window_id
+                    WHERE 
+                        w.active = 1 AND w.deleted = 0
+                )
                 SELECT 
                     d.name AS filial_name, 
                     w.number AS window_number,
-                    u.last_name AS fio
-                FROM window w
-                JOIN department d ON w.department_id = d.id
-                JOIN user u ON u.id = w.user_id
-                WHERE w.active = 1 AND w.deleted = 0
+                    u.last_name AS fio,
+                    SUM(CASE 
+                        WHEN event_type_id = 1 AND (next_event_type IS NULL OR next_event_type IN (2, 3)) THEN 
+                            (julianday(COALESCE(next_event_date, strftime('%Y-%m-%d %H:%M:%S', 'now', '+9 hours'))) - 
+                            julianday(event_date)) * 24 * 60 
+                        ELSE 0 
+                    END) AS working_minutes
+                FROM 
+                    time_intervals ti
+                JOIN 
+                    window w ON ti.window_id = w.id
+                JOIN 
+                    department d ON w.department_id = d.id
+                JOIN 
+                    user u ON u.id = w.user_id
+                GROUP BY 
+                    w.id, w.number, d.name
+                ORDER BY 
+                    w.number;
                 """
                 cursor.execute(query)
                 columns = [col[0] for col in cursor.description]
@@ -110,17 +138,44 @@ class MainPageConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_fact_active_windows(self):
         """Действующие окна"""
+
         try:
             with connections['test'].cursor() as cursor:
                 query = """
+                    WITH time_intervals AS (
+                    SELECT 
+                        w.id AS window_id,
+                        wh.date AS event_date,
+                        wh.event_type_id
+                    FROM 
+                        window w
+                    JOIN 
+                        win_history wh ON w.id = wh.window_id
+                    WHERE 
+                        w.active = 1 AND w.online = 1 AND w.paused = 0 AND w.deleted = 0
+                        AND wh.event_type_id = 1
+                )
                 SELECT 
                     d.name AS filial_name, 
                     w.number AS window_number,
-                    u.last_name AS fio
-                FROM window w
-                JOIN department d ON w.department_id = d.id
-                JOIN user u ON u.id = w.user_id
-                WHERE w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0
+                    u.last_name AS fio,
+                    SUM(CASE 
+                        WHEN event_type_id = 1 THEN 
+                            (strftime('%s', 'now', '+9 hours') - strftime('%s', event_date)) / 60 
+                        ELSE 0 
+                    END) AS working_minutes
+                FROM 
+                    time_intervals ti
+                JOIN 
+                    window w ON ti.window_id = w.id
+                JOIN 
+                    department d ON w.department_id = d.id
+                JOIN 
+                    user u ON u.id = w.user_id
+                GROUP BY 
+                    w.id, w.number, d.name
+                ORDER BY 
+                    w.number;
                 """
                 cursor.execute(query)
                 columns = [col[0] for col in cursor.description]

@@ -218,7 +218,7 @@
                                 <th>Окно</th>
                                 <th>Оператор</th>
                                 <th>Филиал</th>
-                                <th>Текущий статус</th>
+                                <th>Время действия</th>
                             </tr>
                         </thead>
                         <tbody id="modalTableBody">
@@ -416,7 +416,7 @@
                     <td>${item.window_number}</td>
                     <td>${item.fio || 'Неизвестно'}</td>
                     <td>${item.filial_name}</td>
-                    <td>${item.status || 'Неизвестно'}</td>
+                    <td>${Math.ceil(item.working_minutes) + ' мин.'|| 'Неизвестно'}</td>
                 `;
                 modalTableBody.appendChild(row);
             }

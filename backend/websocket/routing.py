@@ -1,5 +1,5 @@
 from django.urls import path
-from . import consumers
+from websocket import consumers
 
 websocket_urlpatterns = [
     path('ws/information_updates/', consumers.MainPageConsumer.as_asgi()),

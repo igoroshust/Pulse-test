@@ -31,17 +31,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 
     async def check_for_changes(self):
         """Проверка изменений в базе данных"""
-        last_data = await self.get_data()
         while True:
-            await asyncio.sleep(120000000000)  # Проверяем каждые 5 секунд
+            await asyncio.sleep(10000)
             current_data = await self.get_data()
-
-            # Находим изменившиеся данные
-            updated_data = [item for item in current_data if item not in last_data]
-
-            if updated_data:  # Если есть изменения
-                await self.send(text_data=json.dumps({'data': updated_data}))
-                last_data = current_data  # Обновляем последнее состояние данных
+            await self.send(text_data=json.dumps({'data': current_data}))
 
     @database_sync_to_async
     def get_data(self):

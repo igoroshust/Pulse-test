@@ -383,12 +383,6 @@
             window.location.href = 'about-page.html';
         });
 
-        // Обновляем DataTable
-        if (dataTable) {
-            dataTable.update(); // Обновляем существующий экземпляр DataTable
-        } else {
-            dataTable = new simpleDatatables.DataTable("#datatablesSimple"); // Инициализируем DataTable
-        }
     };
 
     socket.onerror = function(error) {

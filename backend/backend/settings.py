@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'channels',
     'debug_toolbar',
+    'websocket',
     'corsheaders',
     'dashboard',
     'rest_framework',

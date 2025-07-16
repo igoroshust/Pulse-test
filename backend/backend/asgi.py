@@ -2,8 +2,7 @@ import os
 from django.core.asgi import get_asgi_application # Получение ASGI-приложения Django
 from channels.routing import ProtocolTypeRouter, URLRouter # Классы для маршрутизации протоколов
 from channels.auth import AuthMiddlewareStack # Стек промежуточного ПО для аутентификации
-from api import routing # Маршруты приложения api
-
+from websocket import routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings') # Переменная окружения для настроек Django
 

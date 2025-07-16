@@ -25,6 +25,8 @@
 </head>
 
 <body class="sb-nav-fixed">
+
+<div id="root" style="display: none;"></div> <!-- Заглушка, чтобы React не ругался на отсутствие корня -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <a class="navbar-brand ps-3" href="index.html">Pulse</a>
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
@@ -218,7 +220,7 @@
                                 <th>Окно</th>
                                 <th>Оператор</th>
                                 <th>Филиал</th>
-                                <th>Текущий статус</th>
+                                <th>Время</th>
                             </tr>
                         </thead>
                         <tbody id="modalTableBody">
@@ -381,12 +383,6 @@
             window.location.href = 'about-page.html';
         });
 
-        // Обновляем DataTable
-        if (dataTable) {
-            dataTable.update(); // Обновляем существующий экземпляр DataTable
-        } else {
-            dataTable = new simpleDatatables.DataTable("#datatablesSimple"); // Инициализируем DataTable
-        }
     };
 
     socket.onerror = function(error) {
@@ -416,7 +412,7 @@
                     <td>${item.window_number}</td>
                     <td>${item.fio || 'Неизвестно'}</td>
                     <td>${item.filial_name}</td>
-                    <td>${item.status || 'Неизвестно'}</td>
+                    <td>${Math.ceil(item.working_minutes) + ' мин.'|| 'Неизвестно'}</td>
                 `;
                 modalTableBody.appendChild(row);
             }

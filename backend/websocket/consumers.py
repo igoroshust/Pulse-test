@@ -33,7 +33,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         """Проверка изменений в базе данных"""
         last_data = await self.get_data()
         while True:
-            await asyncio.sleep(10000000000)  # Проверяем каждые 5 секунд
+            await asyncio.sleep(120000000000)  # Проверяем каждые 5 секунд
             current_data = await self.get_data()
 
             # Находим изменившиеся данные

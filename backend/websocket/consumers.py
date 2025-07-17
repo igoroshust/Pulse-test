@@ -5,8 +5,6 @@ from django.db import connections
 import asyncio
 import json
 
-from twisted.names.client import query
-
 
 class MainPageConsumer(AsyncWebsocketConsumer):
     """Потребитель для главной страницы"""
@@ -34,9 +32,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
     async def check_for_changes(self):
         """Проверка изменений в базе данных"""
         while True:
-            await asyncio.sleep(5000000000)
+            await asyncio.sleep(50000000000)
             current_data = await self.get_data()
             await self.send(text_data=json.dumps({'data': current_data}))
+
 
     @database_sync_to_async
     def get_data(self):
@@ -142,7 +141,6 @@ class MainPageConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_fact_active_windows(self):
         """Действующие окна"""
-
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -190,7 +188,6 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             return {'error': str(e)}
-
 
     @database_sync_to_async
     def get_delay_by_windows(self):
@@ -244,7 +241,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_active_windows_by_filial(self, filial):
-        """Активные окна конкретного филиала"""
+        """Активные окна филиала"""
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -296,7 +293,108 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             return {'Error': str(e)}
 
     @database_sync_to_async
-    def get_deep_recording_by_filial(self):
+    def get_fact_active_windows_by_filial(self): # + filial как параметр
+        """Действующие окна филиала"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                    WITH time_intervals AS (
+                    SELECT 
+                        w.id AS window_id,
+                        wh.date AS event_date,
+                        wh.event_type_id
+                    FROM 
+                        window w
+                    JOIN 
+                        win_history wh ON w.id = wh.window_id
+                    WHERE 
+                        w.active = 1 AND w.online = 1 AND w.paused = 0 AND w.deleted = 0
+                        AND wh.event_type_id = 1 -- 2, 3 в реально базе
+                )
+                SELECT 
+                    d.name AS filial_name, 
+                    w.number AS window_number,
+                    u.last_name AS fio,
+                    SUM(CASE 
+                        WHEN event_type_id = 1 THEN 
+                            (strftime('%s', 'now', '+9 hours') - strftime('%s', event_date)) / 60 
+                        ELSE 0 
+                    END) AS working_minutes
+                FROM 
+                    time_intervals ti
+                JOIN 
+                    window w ON ti.window_id = w.id
+                JOIN 
+                    department d ON w.department_id = d.id
+                JOIN 
+                    user u ON u.id = w.user_id
+                GROUP BY 
+                    w.id, w.number, d.name
+                ORDER BY 
+                    w.number;
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+
+                return result
+
+        except Exception as e:
+            return {'error': str(e)} #
+
+    @database_sync_to_async
+    def get_delay_by_windows_by_filial(self): # filial как параметр
+        """Простой по окнам филиала"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                WITH time_intervals AS (
+                    SELECT
+                        w.id AS window_id,
+                        wh.date AS event_date,
+                        wh.event_type_id
+                    FROM
+                        window w
+                    JOIN
+                        win_history wh ON w.id = wh.window_id
+                    WHERE
+                        w.active = 1 AND w.online = 0 AND w.paused = 0 AND w.deleted = 0
+                        AND wh.event_type_id = 1 -- 1, 4, 5 в реальной базе
+                )
+                SELECT
+                    d.name AS filial_name,
+                    w.number AS window_number,
+                    u.last_name AS fio,
+                    SUM(CASE WHEN event_type_id = 1 THEN 
+                    (strftime('%s', 'now', '+9 hours') - strftime('%s', event_date)) / 60
+                    ELSE 0
+                    END) AS working_minutes
+                FROM 
+                    time_intervals ti
+                JOIN 
+                    window w ON ti.window_id = w.id
+                JOIN 
+                    department d ON w.department_id = d.id
+                JOIN 
+                    user u ON u.id = w.user_id
+                GROUP BY
+                    w.id, w.number, d.name
+                ORDER BY
+                    w.number;
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+
+                return result
+
+        except Exception as e:
+            return {'error': str(e)}
+
+    @database_sync_to_async
+    def get_deep_recording_by_filial(self): # + filial как параметр
         """Глубина записи по талонам для каждого филиала"""
         try:
             with connections['test'].cursor() as cursor:
@@ -304,7 +402,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 SELECT 
                     COUNT(CASE WHEN t.status_id in(4,6) THEN 1 END) AS total_talons,  -- Общее количество талонов
                     COUNT(CASE WHEN t.status_id = 13 THEN 1 END) AS waiting_talons,  -- Количество талонов со статусом 13
-                    COUNT(CASE WHEN t.status_id = 9 THEN 1 END) AS not_accepted_talons
+                    COUNT(CASE WHEN t.status_id = 9 THEN 1 END) AS not_accepted_talons -- Сброшенные талоны
                 FROM 
                     seans s 
                 JOIN 
@@ -346,6 +444,16 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             filial = data.get('filial')
             filial_active_windows = await self.get_active_windows_by_filial(filial)
             await self.send(text_data=json.dumps({'action': 'get_active_windows_by_filial', 'data': filial_active_windows}))
+
+        if data.get('action') == 'get_fact_active_windows_by_filial':
+            # filial = data.get('filial')
+            filial_fact_active_windows = await self.get_fact_active_windows_by_filial() # filial
+            await self.send(text_data=json.dumps({'action': 'get_fact_active_windows_by_filial', 'data': filial_fact_active_windows}))
+
+        if data.get('action') == 'get_delay_by_windows_by_filial':
+            # filial = data.get('filial')
+            filial_windows_delay = await self.get_delay_by_windows_by_filial() # filial
+            await self.send(text_data=json.dumps({'action': 'get_delay_by_windows_by_filial', 'data': filial_windows_delay}))
 
         if data.get('action') == 'get_deep_recording_by_filial':
             # filial = data.get('filial')

@@ -269,6 +269,36 @@
         </div>
     </div>
 
+    <!-- Модальное окно для глубины записи по талонам (таблица) -->
+    <div class="modal fade" id="dataModal-deepRecordingTable" tabindex="-1" aria-labelledby="dataModal-deepRecordingTable-Label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModal-deepRecordingTable-Label">Данные</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Обслужено</th>
+                                <th>В очереди</th>
+                                <th>Сброшено</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalDeepRecordingTableBody">
+                            <!-- Добавляем данные через JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 <script>
     const socket = new WebSocket('ws://localhost:8080/ws/information_updates/');
     let dataTable; // Переменная для хранения экземпляра DataTable
@@ -285,8 +315,14 @@
         // Информация в модальных окнах по блокам (перечисляем методы из MainPageConsumer)
         if (data.action === 'get_active_windows' ||
         data.action === 'get_fact_active_windows' ||
-        data.action === 'get_delay_by_windows') {
+        data.action === 'get_delay_by_windows' ||
+        data.action === 'get_active_windows_by_filial' ||
+        data.action === 'get_fact_active_windows_by_filial' ||
+        data.action === 'get_delay_by_windows_by_filial') {
             openModal(data.data);
+            return;
+        } else if  (data.action === 'get_deep_recording_by_filial') {
+            openModal_deepRecording(data.data);
             return;
         }
 
@@ -312,21 +348,47 @@
                 // Добавляем новую строку
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="branch-name">${item.filial_name}</td>
-                    <td>${item.active_windows_count}</td>
-                    <td>${item.fact_active_windows_count}</td>
-                    <td>${item.delay_by_windows}</td>
-                    <td>${item.deep_recording || 'Неизвестно'}</td>
-                    <td>${item.difference_in_minutes} минут</td>
+                    <td class="filial-name">${item.filial_name}</td>
+                    <td class="filial-active-windows-count">${item.active_windows_count}</td>
+                    <td class="filial-fact-active-windows-count">${item.fact_active_windows_count}</td>
+                    <td class="filial-delay-by-windows">${item.delay_by_windows}</td>
+                    <td class="filial-deep-recording">${item.deep_recording + ' человек(-а)'|| 'Неизвестно'}</td>
+                    <td class="filial-difference-in-minutes">${item.difference_in_minutes} минут</td>
                 `;
                 tableBody.appendChild(row);
+
+                // Обработчик клика (Активные окна)
+                const filialActiveWindowsCell = row.querySelector('.filial-active-windows-count');
+                filialActiveWindowsCell.addEventListener('click', function() {
+                    socket.send(JSON.stringify({ action: 'get_active_windows_by_filial' })); // Запрос на получение действующих окон
+                });
+
+                 // Обработчик клика (Действующие окна)
+                const filialFactActiveWindowsCell = row.querySelector('.filial-fact-active-windows-count');
+                filialFactActiveWindowsCell.addEventListener('click', function() {
+                    socket.send(JSON.stringify({ action: 'get_fact_active_windows_by_filial' })); // Запрос на получение действующих окон
+                });
+
+                 // Обработчик клика (Простой по окнам)
+                const filialDelayByWindowsCell = row.querySelector('.filial-delay-by-windows');
+                filialDelayByWindowsCell.addEventListener('click', function() {
+                    socket.send(JSON.stringify({ action: 'get_delay_by_windows_by_filial' })); // Запрос на получение действующих окон
+                });
+
+                // Обработчик клика (Глубина записи)
+                const filialDeepRecordingCell = row.querySelector('.filial-deep-recording');
+                filialDeepRecordingCell.addEventListener('click', function() {
+                    console.log('Клик ГЛУБИНА ЗАПИСИ');
+                    socket.send(JSON.stringify({ action: 'get_deep_recording_by_filial' })); // Запрос на получение действующих окон
+                });
             }
 
-                // Обновляем цифру с общей информацией по окнам
-                totalActiveWindows += item.active_windows_count;
-                totalFactActiveWindows += item.fact_active_windows_count;
-                totalDelayByWindows += item.delay_by_windows;
+            // Обновляем цифру с общей информацией по окнам
+            totalActiveWindows += item.active_windows_count;
+            totalFactActiveWindows += item.fact_active_windows_count;
+            totalDelayByWindows += item.delay_by_windows;
         });
+
 
         // Обновляем значения в карточках
         document.querySelector('#activeWindowsCard a').textContent = totalActiveWindows;
@@ -335,6 +397,7 @@
 
         // Привязываем обработчики событий к новым ячейкам
         attachBranchClickHandlers();
+        // attachBranchClickHandlers1();
 
         // Инициализация DataTable (нужно для подгрузки скриптов/стилей для таблицы после получения данных с базы)
         dataTable = new simpleDatatables.DataTable("#datatablesSimple");
@@ -373,7 +436,6 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal-1'));
             modal.hide();
 
-
             // Сохраняем данные в localStorage
             localStorage.setItem('filial', selectedFilial);
             localStorage.setItem('date', selectedDate);
@@ -382,7 +444,6 @@
             // Перенаправляем на about-page
             window.location.href = 'about-page.html';
         });
-
     };
 
     socket.onerror = function(error) {
@@ -423,12 +484,32 @@
         modal.show();
     }
 
+    // Функция для открытия модального окна (ГЛУБИНА ЗАПИСИ)
+    function openModal_deepRecording(data) {
+        const modalDeepRecordingTableBody = document.getElementById('modalDeepRecordingTableBody');
+        modalDeepRecordingTableBody.innerHTML = ''; // Очищаем предыдущие данные
+
+        data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.total_talons}</td>
+                    <td>${item.waiting_talons}</td>
+                    <td>${item.not_accepted_talons}</td>
+                `;
+                modalDeepRecordingTableBody.appendChild(row);
+        });
+
+        // Показываем модальное окно
+        const modal = new bootstrap.Modal(document.getElementById('dataModal-deepRecordingTable'));
+        modal.show();
+    }
+
     // Сохраняем выбранный пользователем филиал
     let selectedFilial = '';
 
-    // Функция для привязки обработчиков событий к ячейкам с классом branch-name
+    // Функция для привязки обработчиков событий к ячейкам с классом filial-name
     function attachBranchClickHandlers() {
-        const filialCells = document.querySelectorAll('.branch-name');
+        const filialCells = document.querySelectorAll('.filial-name');
         filialCells.forEach(cell => {
             cell.addEventListener('click', function() {
                 selectedFilial = this.textContent; // Получаем имя филиала
@@ -440,6 +521,24 @@
             });
         });
     }
+
+<!--    function attachBranchClickHandlers1() {-->
+<!--        const filialCells = document.querySelectorAll('.filial-active-windows');-->
+<!--        filialCells.forEach(cell => {-->
+<!--            cell.addEventListener('click', function() {-->
+<!--                selectedFilial = this.closest('tr').querySelector('.filial-name').textContent; // Получаем имя филиала из соседней ячейки-->
+<!--                console.log('Клик');-->
+<!--                console.log('Выбран филиал:', selectedFilial); // Для отладки-->
+
+<!--                // Отправляем запрос на сервер для получения активных окон конкретного филиала-->
+<!--                socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: selectedFilial }));-->
+
+<!--                // Открываем модальное окно-->
+<!--                const modal = new bootstrap.Modal(document.getElementById('dataModal'));-->
+<!--                modal.show();-->
+<!--            });-->
+<!--        });-->
+<!--    }-->
 
     document.addEventListener('DOMContentLoaded', function() {
         const datePicker = document.getElementById('datePicker'); // Выбор даты
@@ -458,8 +557,14 @@
 
         // Обработчик клика для карточки "Простой по окнам"
         document.getElementById('delayByWindows').addEventListener('click', function() {
-            socket.send(JSON.stringify({ action: 'get_delay_by_windows' })); // Запрос на получение действующих окон
+            socket.send(JSON.stringify({ action: 'get_delay_by_windows' })); // Запрос на получение простоя по окнам
         });
+
+        // Обработчик клика для карточки "Активные окна для филиала"
+<!--        document.getElementById('filial-active-windows').addEventListener('click', function() {-->
+<!--            console.log('Клик из DomContentLoaded');-->
+<!--            socket.send(JSON.stringify({ action: 'get_active_windows_by_filial' })); // Запрос на получение действующих окон-->
+<!--        });-->
     });
 </script>
 

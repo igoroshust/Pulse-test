@@ -32,9 +32,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
     async def check_for_changes(self):
         """Проверка изменений в базе данных"""
         while True:
-            await asyncio.sleep(10000)
+            await asyncio.sleep(50000000000)
             current_data = await self.get_data()
             await self.send(text_data=json.dumps({'data': current_data}))
+
 
     @database_sync_to_async
     def get_data(self):
@@ -49,7 +50,16 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
                     COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) - 
                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS delay_by_windows,
-                    COALESCE(s.avg_wait_time, 'Неизвестно') AS difference_in_minutes
+                    COALESCE(s.avg_wait_time, 'Неизвестно') AS difference_in_minutes,
+                    (SELECT 
+                        COUNT(CASE WHEN t.status_id IN (4, 6) THEN 1 END) + 
+                        COUNT(CASE WHEN t.status_id = 13 THEN 1 END) - 
+                        COUNT(CASE WHEN t.status_id = 9 THEN 1 END) 
+                     FROM 
+                        seans s2 
+                     JOIN 
+                        talon t ON s2.talon_id = t.id AND s2.serv_day = date('now')
+                        AND t.talon_type_id=2 AND s.unit_id = d.unit_id) AS deep_recording  -- s.unit_id = 13001 для наглядности можно
                 FROM 
                     window w
                 JOIN 
@@ -131,7 +141,6 @@ class MainPageConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_fact_active_windows(self):
         """Действующие окна"""
-
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -179,7 +188,6 @@ class MainPageConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             return {'error': str(e)}
-
 
     @database_sync_to_async
     def get_delay_by_windows(self):
@@ -231,6 +239,188 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             return {'error': str(e)}
 
+    @database_sync_to_async
+    def get_active_windows_by_filial(self, filial):
+        """Активные окна филиала"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                WITH time_intervals AS (
+                    SELECT 
+                        w.id AS window_id,
+                        wh.date AS event_date,
+                        wh.event_type_id,
+                        LEAD(wh.date) OVER (PARTITION BY w.id ORDER BY wh.date) AS next_event_date,
+                        LEAD(wh.event_type_id) OVER (PARTITION BY w.id ORDER BY wh.date) AS next_event_type
+                    FROM 
+                        window w
+                    JOIN 
+                        win_history wh ON w.id = wh.window_id
+                    WHERE 
+                        w.active = 1 AND w.deleted = 0
+                )
+                SELECT 
+                    d.name AS filial_name, 
+                    w.number AS window_number,
+                    u.last_name AS fio,
+                    SUM(CASE 
+                        WHEN event_type_id = 1 AND (next_event_type IS NULL OR next_event_type IN (2, 3)) THEN 
+                            (julianday(COALESCE(next_event_date, strftime('%Y-%m-%d %H:%M:%S', 'now', '+9 hours'))) - 
+                            julianday(event_date)) * 24 * 60 
+                        ELSE 0 
+                    END) AS working_minutes
+                FROM 
+                    time_intervals ti
+                JOIN 
+                    window w ON ti.window_id = w.id
+                JOIN 
+                    department d ON w.department_id = d.id
+                JOIN 
+                    user u ON u.id = w.user_id
+                GROUP BY 
+                    w.id, w.number, d.name
+                ORDER BY 
+                    w.number;
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+
+        except Exception as e:
+            return {'Error': str(e)}
+
+    @database_sync_to_async
+    def get_fact_active_windows_by_filial(self): # + filial как параметр
+        """Действующие окна филиала"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                    WITH time_intervals AS (
+                    SELECT 
+                        w.id AS window_id,
+                        wh.date AS event_date,
+                        wh.event_type_id
+                    FROM 
+                        window w
+                    JOIN 
+                        win_history wh ON w.id = wh.window_id
+                    WHERE 
+                        w.active = 1 AND w.online = 1 AND w.paused = 0 AND w.deleted = 0
+                        AND wh.event_type_id = 1 -- 2, 3 в реально базе
+                )
+                SELECT 
+                    d.name AS filial_name, 
+                    w.number AS window_number,
+                    u.last_name AS fio,
+                    SUM(CASE 
+                        WHEN event_type_id = 1 THEN 
+                            (strftime('%s', 'now', '+9 hours') - strftime('%s', event_date)) / 60 
+                        ELSE 0 
+                    END) AS working_minutes
+                FROM 
+                    time_intervals ti
+                JOIN 
+                    window w ON ti.window_id = w.id
+                JOIN 
+                    department d ON w.department_id = d.id
+                JOIN 
+                    user u ON u.id = w.user_id
+                GROUP BY 
+                    w.id, w.number, d.name
+                ORDER BY 
+                    w.number;
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+
+                return result
+
+        except Exception as e:
+            return {'error': str(e)} #
+
+    @database_sync_to_async
+    def get_delay_by_windows_by_filial(self): # filial как параметр
+        """Простой по окнам филиала"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                WITH time_intervals AS (
+                    SELECT
+                        w.id AS window_id,
+                        wh.date AS event_date,
+                        wh.event_type_id
+                    FROM
+                        window w
+                    JOIN
+                        win_history wh ON w.id = wh.window_id
+                    WHERE
+                        w.active = 1 AND w.online = 0 AND w.paused = 0 AND w.deleted = 0
+                        AND wh.event_type_id = 1 -- 1, 4, 5 в реальной базе
+                )
+                SELECT
+                    d.name AS filial_name,
+                    w.number AS window_number,
+                    u.last_name AS fio,
+                    SUM(CASE WHEN event_type_id = 1 THEN 
+                    (strftime('%s', 'now', '+9 hours') - strftime('%s', event_date)) / 60
+                    ELSE 0
+                    END) AS working_minutes
+                FROM 
+                    time_intervals ti
+                JOIN 
+                    window w ON ti.window_id = w.id
+                JOIN 
+                    department d ON w.department_id = d.id
+                JOIN 
+                    user u ON u.id = w.user_id
+                GROUP BY
+                    w.id, w.number, d.name
+                ORDER BY
+                    w.number;
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+
+                return result
+
+        except Exception as e:
+            return {'error': str(e)}
+
+    @database_sync_to_async
+    def get_deep_recording_by_filial(self): # + filial как параметр
+        """Глубина записи по талонам для каждого филиала"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                SELECT 
+                    COUNT(CASE WHEN t.status_id in(4,6) THEN 1 END) AS total_talons,  -- Общее количество талонов
+                    COUNT(CASE WHEN t.status_id = 13 THEN 1 END) AS waiting_talons,  -- Количество талонов со статусом 13
+                    COUNT(CASE WHEN t.status_id = 9 THEN 1 END) AS not_accepted_talons -- Сброшенные талоны
+                FROM 
+                    seans s 
+                JOIN 
+                    talon t 
+                ON 
+                    s.talon_id = t.id 
+                -- WHERE s.serv_day = "2025-07-17" AND t.talon_type_id=2 AND s.unit_id = 13001;
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+
+        except Exception as e:
+            return {'Error': str(e)}
+
 
     async def receive(self, text_data):
         """Обработка полученных от сервера данных"""
@@ -249,6 +439,26 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         if data.get('action') == 'get_delay_by_windows':
             windows_delay = await self.get_delay_by_windows()
             await self.send(text_data=json.dumps({'action': 'get_delay_by_windows', 'data': windows_delay}))
+
+        if data.get('action') == 'get_active_windows_by_filial':
+            filial = data.get('filial')
+            filial_active_windows = await self.get_active_windows_by_filial(filial)
+            await self.send(text_data=json.dumps({'action': 'get_active_windows_by_filial', 'data': filial_active_windows}))
+
+        if data.get('action') == 'get_fact_active_windows_by_filial':
+            # filial = data.get('filial')
+            filial_fact_active_windows = await self.get_fact_active_windows_by_filial() # filial
+            await self.send(text_data=json.dumps({'action': 'get_fact_active_windows_by_filial', 'data': filial_fact_active_windows}))
+
+        if data.get('action') == 'get_delay_by_windows_by_filial':
+            # filial = data.get('filial')
+            filial_windows_delay = await self.get_delay_by_windows_by_filial() # filial
+            await self.send(text_data=json.dumps({'action': 'get_delay_by_windows_by_filial', 'data': filial_windows_delay}))
+
+        if data.get('action') == 'get_deep_recording_by_filial':
+            # filial = data.get('filial')
+            filial_deep_recording = await self.get_deep_recording_by_filial() # filial как аргумент
+            await self.send(text_data=json.dumps({'action': 'get_deep_recording_by_filial', 'data': filial_deep_recording}))
 
 
 class AboutPageConsumer(AsyncWebsocketConsumer):

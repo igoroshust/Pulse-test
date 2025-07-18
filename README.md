@@ -24,8 +24,17 @@
 2. Вернуться на уровень Pulse-test (если находимся в Pulse-test>backend, то нужно cd ..)
 3. cd frontend
 4. npm i
-5. npm start
-6. Перейти по ссылке из консоли (пример: http://localhost:3000)
+
+- Запуск в режиме Development (видны ошибки react-scripts):
+  1) npm start
+  2) Перейти по ссылке из консоли (пример: http://localhost:3000)
+
+
+- Запуск в режиме Production:
+  1) npm install -g serve
+  2) npm run build
+  3) serve -s build
+  4) Перейти по ссылке из консоли (пример: http://localhost:3000)
 
 ### Настройка WS на клиенте
 1. Установить Redis: https://github.com/redis-windows/redis-windows/releases

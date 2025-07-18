@@ -339,6 +339,7 @@
 
             if (existingRow) {
                 // Обновляем существующую строку
+                existingRow.cells[0].textContent = item.filial_name;
                 existingRow.cells[1].textContent = item.active_windows_count;
                 existingRow.cells[2].textContent = item.fact_active_windows_count;
                 existingRow.cells[3].textContent = item.delay_by_windows;
@@ -357,29 +358,37 @@
                 `;
                 tableBody.appendChild(row);
 
-                // Обработчик клика (Активные окна)
+                 // Обработчик клика (Активные окна)
                 const filialActiveWindowsCell = row.querySelector('.filial-active-windows-count');
                 filialActiveWindowsCell.addEventListener('click', function() {
-                    socket.send(JSON.stringify({ action: 'get_active_windows_by_filial' })); // Запрос на получение действующих окон
+                    const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
+                    // Отправляем запрос на сервер
+                    socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
                 });
+
 
                  // Обработчик клика (Действующие окна)
                 const filialFactActiveWindowsCell = row.querySelector('.filial-fact-active-windows-count');
                 filialFactActiveWindowsCell.addEventListener('click', function() {
-                    socket.send(JSON.stringify({ action: 'get_fact_active_windows_by_filial' })); // Запрос на получение действующих окон
+                    const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
+                    // Запрос на получение действующих окон для конкретного филиала
+                    socket.send(JSON.stringify({ action: 'get_fact_active_windows_by_filial', filial: filialName }));
                 });
 
                  // Обработчик клика (Простой по окнам)
                 const filialDelayByWindowsCell = row.querySelector('.filial-delay-by-windows');
                 filialDelayByWindowsCell.addEventListener('click', function() {
-                    socket.send(JSON.stringify({ action: 'get_delay_by_windows_by_filial' })); // Запрос на получение действующих окон
+                    const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
+                    // Отправляем запрос на сервер
+                    socket.send(JSON.stringify({ action: 'get_delay_by_windows_by_filial', filial: filialName }));
                 });
 
                 // Обработчик клика (Глубина записи)
                 const filialDeepRecordingCell = row.querySelector('.filial-deep-recording');
                 filialDeepRecordingCell.addEventListener('click', function() {
-                    console.log('Клик ГЛУБИНА ЗАПИСИ');
-                    socket.send(JSON.stringify({ action: 'get_deep_recording_by_filial' })); // Запрос на получение действующих окон
+                    const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
+                    // Отправляем запрос на сервер
+                    socket.send(JSON.stringify({ action: 'get_deep_recording_by_filial', filial: filialName }));
                 });
             }
 
@@ -400,7 +409,11 @@
         // attachBranchClickHandlers1();
 
         // Инициализация DataTable (нужно для подгрузки скриптов/стилей для таблицы после получения данных с базы)
-        dataTable = new simpleDatatables.DataTable("#datatablesSimple");
+        try {
+            dataTable = new simpleDatatables.DataTable("#datatablesSimple");
+        } catch (error) {
+            console.error('Ошибка инициализации DataTable')
+        }
 
         // Обработчик изменения для выбора даты и диапазона
         datePicker.addEventListener('change', checkButtonState);

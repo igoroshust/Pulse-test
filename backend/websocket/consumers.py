@@ -58,7 +58,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                      FROM 
                         seans s2 
                      JOIN 
-                        talon t ON s2.talon_id = t.id AND s2.serv_day = date('now')
+                        talon t ON s2.talon_id = t.id AND s2.serv_day = '2025-07-17' -- заменить на date('now')
                         AND t.talon_type_id=2 AND s.unit_id = d.unit_id) AS deep_recording  -- s.unit_id = 13001 для наглядности можно
                 FROM 
                     window w
@@ -77,9 +77,8 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 cursor.execute(query)
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
-                # Преобразуем данные в список словарей
-                result = [dict(zip(columns, row)) for row in data]
 
+                result = [dict(zip(columns, row)) for row in data]
                 return result
 
         except Exception as e:
@@ -242,6 +241,11 @@ class MainPageConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_active_windows_by_filial(self, filial):
         """Активные окна филиала"""
+        if not filial:  # Проверяем, что filial не пустой
+            return {'Error': 'Имя филиала не может быть пустым.'}
+
+        print(f"Запрос для филиала: '{filial}'")  # Отладочное сообщение
+
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -265,7 +269,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     u.last_name AS fio,
                     SUM(CASE 
                         WHEN event_type_id = 1 AND (next_event_type IS NULL OR next_event_type IN (2, 3)) THEN 
-                            (julianday(COALESCE(next_event_date, strftime('%Y-%m-%d %H:%M:%S', 'now', '+9 hours'))) - 
+                            (julianday(COALESCE(next_event_date, strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now', '+9 hours'))) - 
                             julianday(event_date)) * 24 * 60 
                         ELSE 0 
                     END) AS working_minutes
@@ -277,12 +281,14 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     department d ON w.department_id = d.id
                 JOIN 
                     user u ON u.id = w.user_id
+                WHERE 
+                    d.name = %s
                 GROUP BY 
                     w.id, w.number, d.name
                 ORDER BY 
                     w.number;
                 """
-                cursor.execute(query)
+                cursor.execute(query, (filial,))  # Передаем параметр как кортеж
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
 
@@ -290,11 +296,17 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 return result
 
         except Exception as e:
+            print(f"Ошибка: {str(e)}")  # Логируем ошибку
             return {'Error': str(e)}
 
     @database_sync_to_async
-    def get_fact_active_windows_by_filial(self): # + filial как параметр
+    def get_fact_active_windows_by_filial(self, filial):
         """Действующие окна филиала"""
+        if not filial:
+            return {'Error': 'Имя филиала не может быть пустым'}
+
+        print(f'Выполняем запрос для филиала: {filial}')
+
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -317,7 +329,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     u.last_name AS fio,
                     SUM(CASE 
                         WHEN event_type_id = 1 THEN 
-                            (strftime('%s', 'now', '+9 hours') - strftime('%s', event_date)) / 60 
+                            (strftime('%%s', 'now', '+9 hours') - strftime('%%s', event_date)) / 60 
                         ELSE 0 
                     END) AS working_minutes
                 FROM 
@@ -328,24 +340,31 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     department d ON w.department_id = d.id
                 JOIN 
                     user u ON u.id = w.user_id
+                WHERE
+                    d.name = %s
                 GROUP BY 
                     w.id, w.number, d.name
                 ORDER BY 
                     w.number;
                 """
-                cursor.execute(query)
+                cursor.execute(query, (filial,))
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
-                result = [dict(zip(columns, row)) for row in data]
 
+                result = [dict(zip(columns, row)) for row in data]
                 return result
 
         except Exception as e:
-            return {'error': str(e)} #
+            return {'error': str(e)}
 
     @database_sync_to_async
-    def get_delay_by_windows_by_filial(self): # filial как параметр
+    def get_delay_by_windows_by_filial(self, filial):
         """Простой по окнам филиала"""
+        if not filial:
+            return {'Error': 'Имя филиала не может быть пустым'}
+
+        print(f'Выполняем запрос для филиала: {filial}')
+
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -367,7 +386,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     w.number AS window_number,
                     u.last_name AS fio,
                     SUM(CASE WHEN event_type_id = 1 THEN 
-                    (strftime('%s', 'now', '+9 hours') - strftime('%s', event_date)) / 60
+                    (strftime('%%s', 'now', '+9 hours') - strftime('%%s', event_date)) / 60
                     ELSE 0
                     END) AS working_minutes
                 FROM 
@@ -378,12 +397,14 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     department d ON w.department_id = d.id
                 JOIN 
                     user u ON u.id = w.user_id
+                WHERE
+                    d.name = %s
                 GROUP BY
                     w.id, w.number, d.name
                 ORDER BY
                     w.number;
                 """
-                cursor.execute(query)
+                cursor.execute(query, (filial,))
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
                 result = [dict(zip(columns, row)) for row in data]
@@ -394,8 +415,13 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             return {'error': str(e)}
 
     @database_sync_to_async
-    def get_deep_recording_by_filial(self): # + filial как параметр
+    def get_deep_recording_by_filial(self, filial):
         """Глубина записи по талонам для каждого филиала"""
+        if not filial:
+            return {'Error': 'Имя филиала не может быть пустым'}
+
+        print(f'Выполняем запрос для филиала: {filial}')
+
         try:
             with connections['test'].cursor() as cursor:
                 query = """
@@ -405,13 +431,12 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     COUNT(CASE WHEN t.status_id = 9 THEN 1 END) AS not_accepted_talons -- Сброшенные талоны
                 FROM 
                     seans s 
-                JOIN 
-                    talon t 
-                ON 
-                    s.talon_id = t.id 
+                JOIN talon t ON s.talon_id = t.id 
+                JOIN department d ON s.unit_id = d.unit_id
+                WHERE d.name = %s;
                 -- WHERE s.serv_day = "2025-07-17" AND t.talon_type_id=2 AND s.unit_id = 13001;
                 """
-                cursor.execute(query)
+                cursor.execute(query, (filial,))
                 columns = [col[0] for col in cursor.description]
                 data = cursor.fetchall()
 
@@ -446,18 +471,18 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({'action': 'get_active_windows_by_filial', 'data': filial_active_windows}))
 
         if data.get('action') == 'get_fact_active_windows_by_filial':
-            # filial = data.get('filial')
-            filial_fact_active_windows = await self.get_fact_active_windows_by_filial() # filial
+            filial = data.get('filial')
+            filial_fact_active_windows = await self.get_fact_active_windows_by_filial(filial)
             await self.send(text_data=json.dumps({'action': 'get_fact_active_windows_by_filial', 'data': filial_fact_active_windows}))
 
         if data.get('action') == 'get_delay_by_windows_by_filial':
-            # filial = data.get('filial')
-            filial_windows_delay = await self.get_delay_by_windows_by_filial() # filial
+            filial = data.get('filial')
+            filial_windows_delay = await self.get_delay_by_windows_by_filial(filial)
             await self.send(text_data=json.dumps({'action': 'get_delay_by_windows_by_filial', 'data': filial_windows_delay}))
 
         if data.get('action') == 'get_deep_recording_by_filial':
-            # filial = data.get('filial')
-            filial_deep_recording = await self.get_deep_recording_by_filial() # filial как аргумент
+            filial = data.get('filial')
+            filial_deep_recording = await self.get_deep_recording_by_filial(filial)
             await self.send(text_data=json.dumps({'action': 'get_deep_recording_by_filial', 'data': filial_deep_recording}))
 
 

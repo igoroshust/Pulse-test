@@ -4,48 +4,50 @@
 2. Скачать проект с Github
 3. Открыть проект в IDE (Pulse-test)
 4. Выполнить команды в консоле:
-5. python -m venv venv
-6. venv\scripts\activate
-7. pip install -r requirements.txt
-7. cd backend
-8. python manage.py runserver (запуск сервера)
+- `venv\scripts\activate`
+- `pip install -r requirements.txt`
+- `cd backend`
+- `python manage.py runserver` (запуск сервера)
 
 ### Настройка WS на сервере
 1. Открыть консоль (cmd/powershell)
 2. Перейти по пути расположения проекта (Pulse-test)
-3. venv\scripts\activate
-4. cd backend
-5. set DJANGO_SETTINGS_MODULE=backend.settings
-6. daphne -p 5050 backend.asgi:application (порт можно поменять на другой)
+3. Выполнить команды:
+- `venv\scripts\activate`
+- `cd backend`
+- `set DJANGO_SETTINGS_MODULE=backend.settings`
+- `echo %DJANGO_SETTINGS_MODULE%` (проверка, должно вернуть backend.settings)
+- `daphne -p 5050 backend.asgi:application` (-p <порт> можно поменять на любой свободный)
 
 ### Настройка фронтенда
 
-1. Открыть новую вкладку терминала (сервер должен быть запущен!)
-2. Вернуться на уровень Pulse-test (если находимся в Pulse-test>backend, то нужно cd ..)
-3. cd frontend
-4. npm i
+1. Открыть новую вкладку терминала в IDE (сервер должен быть запущен!)
+2. Вернуться на уровень Pulse-test (если находимся в Pulse-test>backend, то нужно `cd ..`)
+3. Выполнить команды:
+- `cd frontend`
+- `npm i` (установка зависимостей)
 
-- Запуск в режиме Development (видны ошибки react-scripts):
-  1) npm start
-  2) Перейти по ссылке из консоли (пример: http://localhost:3000)
+Для запуска фронтенда в режиме Development:
+- `npm start`
+- Переходим на клиент по ссылке из консоли (пример: http://localhost:3000)
 
 
-- Запуск в режиме Production:
-  1) npm install -g serve
-  2) npm run build
-  3) serve -s build
-  4) Перейти по ссылке из консоли (пример: http://localhost:3000)
+Для запуска в режиме Production:
+- `npm install -g serve`
+- `npm run build`
+- `serve -s build`
+- Переходим на клиент по ссылке из консоли
 
-### Настройка WS на клиенте
-1. Установить Redis: https://github.com/redis-windows/redis-windows/releases
-2. Запустить redis_server.exe
+### Настройка WebSocket на клиенте
+1. Установить Redis (не ниже 7 версии!). [Скачать Redis](https://github.com/redis-windows/redis-windows/releases)
+2. Запустить `redis_server.exe` в режиме администратора
 
-### Запуск тестов 
+### Запуск тестов (из BASE_DIR)
 
 #### асинхронное создание талонов
-
-1. cd frontend
-2. node run-tests.js
+- `cd frontend`
+- `node run-tests.js`
 
 #### cypress
-1. npx cypress open
+- `cd frontend`
+- `npx cypress open`

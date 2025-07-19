@@ -425,7 +425,8 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         try:
             with connections['test'].cursor() as cursor:
                 query = """
-                SELECT 
+                SELECT
+                    d.name AS filial_name,
                     COUNT(CASE WHEN t.status_id in(4,6) THEN 1 END) AS total_talons,  -- Общее количество талонов
                     COUNT(CASE WHEN t.status_id = 13 THEN 1 END) AS waiting_talons,  -- Количество талонов со статусом 13
                     COUNT(CASE WHEN t.status_id = 9 THEN 1 END) AS not_accepted_talons -- Сброшенные талоны

@@ -7,7 +7,7 @@
     <list default="true" id="6e0fe240-8681-4562-9953-5c9b732976be" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/websocket/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/websocket/consumers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,8 +45,8 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "modal-table",
-    "last_opened_file_path": "C:/Users/Oshust/applications/Pulse-test",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Pulse-test/frontend/public/assets/img",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie"
   }
 }]]></component>
@@ -60,12 +60,14 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Pulse-test\frontend\public\assets\img" />
       <recent name="C:\Users\Oshust\applications\Pulse-test\frontend\public" />
       <recent name="C:\Pulse-test\frontend\public\css" />
       <recent name="C:\Pulse\frontend\src" />
       <recent name="C:\Pulse\frontend\public" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Pulse-test\frontend\public\assets\img" />
       <recent name="C:\Users\Oshust\applications\Pulse-test\backend\websocket" />
       <recent name="C:\Pulse\frontend\src\styles" />
     </key>
@@ -102,7 +104,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-53e2683a6804-9cdd278e9d02-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.26094.141" />
+        <option value="bundled-python-sdk-50da183f06c8-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13135.95" />
       </set>
     </attachedChunks>
   </component>

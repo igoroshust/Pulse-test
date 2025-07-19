@@ -4,19 +4,19 @@
 2. Скачать проект с Github
 3. Открыть проект в IDE (Pulse-test)
 4. Выполнить команды в консоле:
+- `python -m venv venv`
 - `venv\scripts\activate`
 - `pip install -r requirements.txt`
 - `cd backend`
 - `python manage.py runserver` (запуск сервера)
 
-### Настройка WS на сервере
+### Настройка WebSocket на сервере
 1. Открыть консоль (cmd/powershell)
 2. Перейти по пути расположения проекта (Pulse-test)
 3. Выполнить команды:
 - `venv\scripts\activate`
 - `cd backend`
 - `set DJANGO_SETTINGS_MODULE=backend.settings`
-- `echo %DJANGO_SETTINGS_MODULE%` (проверка, должно вернуть backend.settings)
 - `daphne -p 5050 backend.asgi:application` (-p <порт> можно поменять на любой свободный)
 
 ### Настройка фронтенда

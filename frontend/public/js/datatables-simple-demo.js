@@ -6,6 +6,5 @@ window.addEventListener('DOMContentLoaded', event => {
 
         // Изменение текста в ячейках
         const rows = datatablesSimple.querySelector('.datatable-info');
-        console.log(rows);
     }
 });

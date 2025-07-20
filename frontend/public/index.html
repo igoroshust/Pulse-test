@@ -14,7 +14,6 @@
     <link href="./assets/img/favicon.ico" type="image/x-icon" rel="icon">
     <link href="./css/styles.css" rel="stylesheet" />
 
-
     <!-- Подключаем WebSocket -->
 <!--    <script src="./js/websocket.js"></script>-->
 
@@ -34,10 +33,10 @@
         <a class="navbar-brand ps-3" href="./index.html">Пульс</a>
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-            <div class="input-group">
-                <input class="form-control" type="text" placeholder="Поиск..." aria-label="Поиск..." aria-describedby="btnNavbarSearch" />
-                <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-            </div>
+<!--            <div class="input-group">-->
+<!--                <input class="form-control" type="text" placeholder="Поиск..." aria-label="Поиск..." aria-describedby="btnNavbarSearch" />-->
+<!--                <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>-->
+<!--            </div>-->
         </form>
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
@@ -134,7 +133,7 @@
                     </ol>
                     <div class="row">
                         <div class="col-xl-3 col-md-6">
-                            <div class="card bg-primary text-white mb-4">
+                            <div class="card bg-primary text-white mb-4" id="deepRecordingTotal">
                                 <div class="card-body">Глубина записи по талонам</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">0</a>
@@ -329,7 +328,8 @@
         data.action === 'get_delay_by_windows_by_filial') {
             openModal(data.data);
             return;
-        } else if  (data.action === 'get_deep_recording_by_filial') {
+        } else if  (data.action === 'get_deep_recording_by_filial' ||
+        data.action === 'get_deep_recording') {
             openModal_deepRecording(data.data);
             return;
         }
@@ -567,19 +567,24 @@
         const rangeSelect = document.getElementById('rangeSelect'); // Выбор диапазона
         const applyButton = document.getElementById('applyButton'); // Кнопка "Применить"
 
-        // Обработчик клика для карточки "Активные окна"
+        // Обработчик клика для блока "Активные окна"
         document.getElementById('activeWindowsCard').addEventListener('click', function() {
             socket.send(JSON.stringify({ action: 'get_active_windows' })); // Запрос на получение активных окон
         });
 
-        // Обработчик клика для карточки "Действующие окна"
+        // Обработчик клика для блока "Действующие окна"
         document.getElementById('activeSessionsCard').addEventListener('click', function() {
             socket.send(JSON.stringify({ action: 'get_fact_active_windows' })); // Запрос на получение действующих окон
         });
 
-        // Обработчик клика для карточки "Простой по окнам"
+        // Обработчик клика для блока "Простой по окнам"
         document.getElementById('delayByWindows').addEventListener('click', function() {
             socket.send(JSON.stringify({ action: 'get_delay_by_windows' })); // Запрос на получение простоя по окнам
+        });
+
+        // Обработчик клика для блока "Глубина записи по талонам"
+        document.getElementById('deepRecordingTotal').addEventListener('click', function() {
+            socket.send(JSON.stringify({ action: 'get_deep_recording' })); // Запрос на глубины записи по талонам
         });
 
         // Обработчик клика для карточки "Активные окна для филиала"

@@ -239,6 +239,32 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             return {'error': str(e)}
 
     @database_sync_to_async
+    def get_deep_recording(self):
+        """Глубина записи по талонам"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                SELECT
+                    d.name AS filial_name,
+                    COUNT(CASE WHEN t.status_id in(4,6) THEN 1 END) AS total_talons,
+                    COUNT(CASE WHEN t.status_id = 13 THEN 1 END) AS waiting_talons,
+                    COUNT(CASE WHEN t.status_id = 9 THEN 1 END) AS not_accepted_talons
+                FROM 
+                    seans s 
+                JOIN talon t ON s.talon_id = t.id 
+                JOIN department d ON s.unit_id = d.unit_id
+                GROUP BY d.name;
+                """
+                cursor.execute(query)
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+        except Exception as e:
+            return {'Error': str(e)}
+
+    @database_sync_to_async
     def get_active_windows_by_filial(self, filial):
         """Активные окна филиала"""
         if not filial:  # Проверяем, что filial не пустой
@@ -465,6 +491,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         if data.get('action') == 'get_delay_by_windows':
             windows_delay = await self.get_delay_by_windows()
             await self.send(text_data=json.dumps({'action': 'get_delay_by_windows', 'data': windows_delay}))
+
+        if data.get('action') == 'get_deep_recording':
+            deep_recording = await self.get_deep_recording()
+            await self.send(text_data=json.dumps({'action': 'get_deep_recording', 'data': deep_recording}))
 
         if data.get('action') == 'get_active_windows_by_filial':
             filial = data.get('filial')

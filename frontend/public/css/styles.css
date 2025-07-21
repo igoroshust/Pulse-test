@@ -115,6 +115,11 @@ body {
     height: auto;
 }
 
+#timer {
+    font-size: 20px;
+    font-weight: bold;
+}
+
 /* ------------------ Конец кастомных стилей ------------------ */
 
 
@@ -4255,6 +4260,8 @@ textarea.form-control-lg {
 }
 
 .card-header {
+  display: flex;
+  justify-content: space-between;
   padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
   margin-bottom: 0;
   color: var(--bs-card-cap-color);

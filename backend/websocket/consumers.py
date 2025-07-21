@@ -2,6 +2,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.db import connections
+from .json_encoder import CustomJSONEncoder
 import asyncio
 import json
 
@@ -34,15 +35,22 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         while True:
             await asyncio.sleep(50000000000)
             current_data = await self.get_data()
-            await self.send(text_data=json.dumps({'data': current_data}))
+            await self.send(text_data=json.dumps({'data': current_data}, cls=CustomJSONEncoder))
+            # await self.get_data() # Обновление кэша
 
 
     @database_sync_to_async
     def get_data(self):
         """Получение данных ДЛЯ ТАБЛИЦЫ из базы (асинхронно)"""
+        # cache_key = 'all_records'
+        # cached_data = cache.get(cache_key)
+        #
+        # if cached_data:
+        #     # Если данные есть в кэше, возвращаем их
+        #     return cached_data
+
         try:
             with connections['test'].cursor() as cursor:
-                # Запрос для получения названий филиалов, количества активных окон и фактических активных окон
                 query = """
                 SELECT 
                     d.name AS filial_name,
@@ -50,7 +58,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS fact_active_windows_count,
                     COUNT(CASE WHEN w.active = 1 AND w.deleted = 0 THEN 1 END) - 
                     COUNT(CASE WHEN w.active = 1 AND w.paused = 0 AND w.online = 1 AND w.deleted = 0 THEN 1 END) AS delay_by_windows,
-                    COALESCE(s.avg_wait_time, 'Неизвестно') AS difference_in_minutes,
+                    COALESCE(s.avg_wait_time, 'Неизвестно') AS avg_time,
                     (SELECT 
                         COUNT(CASE WHEN t.status_id IN (4, 6) THEN 1 END) + 
                         COUNT(CASE WHEN t.status_id = 13 THEN 1 END) - 
@@ -79,6 +87,10 @@ class MainPageConsumer(AsyncWebsocketConsumer):
                 data = cursor.fetchall()
 
                 result = [dict(zip(columns, row)) for row in data]
+
+                # Кэшируем данные в Django
+                # cache.set(cache_key, result, timeout=300)  # Кэшируем на 5 минут
+
                 return result
 
         except Exception as e:
@@ -473,6 +485,44 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             return {'Error': str(e)}
 
+    @database_sync_to_async
+    def get_avg_time_by_filial(self, filial):
+        """Среднее время ожидания по филиалу"""
+        try:
+            with connections['test'].cursor() as cursor:
+                query = """
+                SELECT 
+                    id AS talon_name,
+                    information AS fio,
+                    description AS current_time 
+                FROM department
+                WHERE 
+                    name = %s
+                """
+                cursor.execute(query, (filial,))
+                columns = [col[0] for col in cursor.description]
+                data = cursor.fetchall()
+                result = [dict(zip(columns, row)) for row in data]
+                return result
+
+        except Exception as e:
+            return {'Error': str(e)}
+
+    # Кэширование
+    # @database_sync_to_async
+    # def get_first_page_records(self):
+    #     """Получение данных для первой страницы"""
+    #     all_records = self.get_data()
+    #     return all_records[25:]  # Возвращаем только первые 25 записей
+    #
+    # @database_sync_to_async
+    # def get_page_records(self, page_number):
+    #     """Получение данных для конкретной страницы"""
+    #     all_records = self.get_data()
+    #     page_size = 25
+    #     start_index = (page_number - 1) * page_size
+    #     end_index = start_index + page_size
+    #     return all_records[start_index:end_index]
 
     async def receive(self, text_data):
         """Обработка полученных от сервера данных"""
@@ -515,6 +565,20 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             filial = data.get('filial')
             filial_deep_recording = await self.get_deep_recording_by_filial(filial)
             await self.send(text_data=json.dumps({'action': 'get_deep_recording_by_filial', 'data': filial_deep_recording}))
+
+        if data.get('action') == 'get_avg_time_by_filial':
+            filial = data.get('filial')
+            filial_avg_time = await self.get_avg_time_by_filial(filial)
+            await self.send(text_data=json.dumps({'action': 'get_avg_time_by_filial', 'data': filial_avg_time}))
+
+        # if data.get('action') == 'get_first_page':
+        #     first_page_records = await self.get_first_page_records()
+        #     await self.send(text_data=json.dumps({'action': 'get_first_page', 'data': first_page_records}))
+        #
+        # if data.get('action') == 'get_page':
+        #     page_number = data.get('page_number')
+        #     page_records = await self.get_page_records(page_number)
+        #     await self.send(text_data=json.dumps({'action': 'get_page', 'data': page_records}))
 
 
 class AboutPageConsumer(AsyncWebsocketConsumer):

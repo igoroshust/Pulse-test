@@ -307,6 +307,35 @@
         </div>
     </div>
 
+        <!-- Модальное окно для среднего времени ожидания (таблица) -->
+    <div class="modal fade" id="dataModal-avgTimeTable" tabindex="-1" aria-labelledby="dataModal-avgTimeTable-Label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModal-avgTimeTable-Label">Данные</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Талон</th>
+                                <th>Заявитель</th>
+                                <th>Текущее время</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalAvgTimeTableBody">
+                            <!-- Добавляем данные через JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 <script>
     const socket = new WebSocket('ws://localhost:5050/ws/information_updates/');
@@ -334,6 +363,9 @@
         data.action === 'get_deep_recording') {
             openModal_deepRecording(data.data);
             return;
+        } else if (data.action === 'get_avg_time_by_filial') {
+            openModal_avgTime(data.data);
+            return;
         }
 
         const tableBody = document.querySelector('#datatablesSimple tbody');
@@ -354,7 +386,7 @@
                 existingRow.cells[2].textContent = item.fact_active_windows_count;
                 existingRow.cells[3].textContent = item.delay_by_windows;
                 existingRow.cells[4].textContent = item.deep_recording || 'Неизвестно';
-                existingRow.cells[5].textContent = item.difference_in_minutes + ' минут';
+                existingRow.cells[5].textContent = item.avg_time + ' мин.';
             } else {
                 // Добавляем новую строку
                 const row = document.createElement('tr');
@@ -363,8 +395,8 @@
                     <td class="filial-active-windows-count">${item.active_windows_count}</td>
                     <td class="filial-fact-active-windows-count">${item.fact_active_windows_count}</td>
                     <td class="filial-delay-by-windows">${item.delay_by_windows}</td>
-                    <td class="filial-deep-recording">${item.deep_recording + ' человек(-а)'|| 'Неизвестно'}</td>
-                    <td class="filial-difference-in-minutes">${item.difference_in_minutes} минут</td>
+                    <td class="filial-deep-recording">${item.deep_recording + ' человек(-а)' || 'Неизвестно'}</td>
+                    <td class="filial-avg-time">${Math.ceil(item.avg_time)} мин.</td>
                 `;
                 tableBody.appendChild(row);
 
@@ -399,6 +431,14 @@
                     const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
                     // Отправляем запрос на сервер
                     socket.send(JSON.stringify({ action: 'get_deep_recording_by_filial', filial: filialName }));
+                });
+
+                // Обработчик клика (Среднее время ожидания)
+                const filialAvgTimeCell = row.querySelector('.filial-avg-time');
+                filialAvgTimeCell.addEventListener('click', function() {
+                    const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
+                    // Отправляем запрос на сервер
+                    socket.send(JSON.stringify({ action: 'get_avg_time_by_filial', filial: filialName }));
                 });
             }
 
@@ -525,6 +565,26 @@
 
         // Показываем модальное окно
         const modal = new bootstrap.Modal(document.getElementById('dataModal-deepRecordingTable'));
+        modal.show();
+    }
+
+    // Функция для открытия модального окна (Среднее время ожидания)
+    function openModal_avgTime(data) {
+        const modalAvgTimeTableBody = document.getElementById('modalAvgTimeTableBody');
+        modalAvgTimeTableBody.innerHTML = ''; // Очищаем предыдущие данные
+
+        data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.talon_name}</td>
+                    <td>${item.fio}</td>
+                    <td>${item.current_time}</td>
+                `;
+                modalAvgTimeTableBody.appendChild(row);
+        });
+
+        // Показываем модальное окно
+        const modal = new bootstrap.Modal(document.getElementById('dataModal-avgTimeTable'));
         modal.show();
     }
 

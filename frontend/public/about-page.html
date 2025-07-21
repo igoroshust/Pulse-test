@@ -19,6 +19,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
     <script defer src="js/datatables-simple-demo.js"></script>
     <script defer src="js/scripts.js"></script>
+    <script defer src="js/updateTimer.js"></script>
 </head>
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -229,8 +230,9 @@
 
                     <div class="card mb-4">
                         <div class="card-header">
-                            <i class="fas fa-table me-1"></i>
-                            Информация по филиалу
+                            <div><i class="fas fa-table me-1"></i>
+                            Информация по филиалам</div>
+                            <div id="timer">00:00:00</div>
                         </div>
                         <div class="card-body">
                             <table id="datatablesSimple">

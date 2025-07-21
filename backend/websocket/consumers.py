@@ -485,6 +485,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             return {'Error': str(e)}
 
+    # Новое avg_time
     @database_sync_to_async
     def get_avg_time_by_filial(self, filial):
         """Среднее время ожидания по филиалу"""
@@ -566,6 +567,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
             filial_deep_recording = await self.get_deep_recording_by_filial(filial)
             await self.send(text_data=json.dumps({'action': 'get_deep_recording_by_filial', 'data': filial_deep_recording}))
 
+            # Новое avg_time
         if data.get('action') == 'get_avg_time_by_filial':
             filial = data.get('filial')
             filial_avg_time = await self.get_avg_time_by_filial(filial)

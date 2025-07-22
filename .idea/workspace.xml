@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6e0fe240-8681-4562-9953-5c9b732976be" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/websocket/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/websocket/consumers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +15,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -35,20 +34,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Python.manage.executor": "Run",
-    "Python.server.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Pulse-test/frontend/public/assets/img",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Python.manage.executor&quot;: &quot;Run&quot;,
+    &quot;Python.server.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/react-components&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Pulse-test/frontend/src&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.grazie&quot;
   }
-}]]></component>
+}</component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="Pulse" is-module-sdk="true">
@@ -59,17 +58,18 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Pulse-test\frontend\src" />
+      <recent name="C:\Pulse-test\frontend\src\styles" />
+      <recent name="C:\Pulse-test\frontend\public" />
       <recent name="C:\Pulse-test\frontend\public\assets\img" />
       <recent name="C:\Users\Oshust\applications\Pulse-test\frontend\public" />
-      <recent name="C:\Pulse-test\frontend\public\css" />
-      <recent name="C:\Pulse\frontend\src" />
-      <recent name="C:\Pulse\frontend\public" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Pulse-test\frontend\src\scripts\components" />
+      <recent name="C:\Pulse-test\frontend\src\scripts\components\header" />
+      <recent name="C:\Pulse-test\frontend\src\scripts\components\sidebar" />
       <recent name="C:\Users\Oshust\applications\Pulse-test\frontend\public\assets\img" />
       <recent name="C:\Pulse-test\frontend\public\assets\img" />
-      <recent name="C:\Users\Oshust\applications\Pulse-test\backend\websocket" />
-      <recent name="C:\Pulse\frontend\src\styles" />
     </key>
   </component>
   <component name="RunAnythingCache">
@@ -104,7 +104,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-53e2683a6804-9cdd278e9d02-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.26094.141" />
+        <option value="bundled-python-sdk-50da183f06c8-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13135.95" />
       </set>
     </attachedChunks>
   </component>

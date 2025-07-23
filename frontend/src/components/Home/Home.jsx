@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import '../../scripts/home.js'; // Убедитесь, что этот файл не содержит лишнего кода
+// import '../../scripts/update-timer.js'; // Убедитесь, что этот файл не содержит лишнего кода
+import { DataTable } from 'simple-datatables'; // Импортируем DataTable
 
 function Home() {
   const [data, setData] = useState([]);
   const [selectedFilial, setSelectedFilial] = useState('');
   const [socket, setSocket] = useState(null);
+  const [dataTable, setDataTable] = useState(null); // Храним экземпляр DataTable
 
   useEffect(() => {
     // Устанавливаем WebSocket соединение
@@ -48,6 +50,36 @@ function Home() {
       newSocket.close();
     };
   }, []); // Пустой массив зависимостей, чтобы выполнить эффект только один раз при монтировании
+
+  useEffect(() => {
+    if (dataTable) {
+      dataTable.destroy(); // Уничтожаем предыдущую таблицу, если она существует
+    }
+    const table = new DataTable('#datatablesSimple', {
+      data: {
+        headings: [
+          'Филиал',
+          'Активные окна',
+          'Действующие окна',
+          'Простой по окнам',
+          'Глубина записи по талонам',
+          'Среднее время ожидания',
+        ],
+        data: data.map(item => [
+          item.filial_name,
+          item.active_windows_count,
+          item.fact_active_windows_count,
+          item.delay_by_windows,
+          item.deep_recording,
+          item.avg_time,
+        ]),
+      },
+    });
+    setDataTable(table); // Сохраняем экземпляр DataTable
+    return () => {
+      table.destroy(); // Уничтожаем таблицу при размонтировании компонента
+    };
+  }, [data]); // Запускаем эффект при изменении данных
 
   // Функция для открытия модального окна и заполнения данными
   const openModal = (data) => {

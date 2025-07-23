@@ -25,7 +25,8 @@ function Home() {
       // Обработка данных
       if (data.action === 'get_active_windows' ||
           data.action === 'get_fact_active_windows' ||
-           data.action === 'get_delay_by_windows') {
+           data.action === 'get_delay_by_windows' ||
+           data.action === 'get_active_windows_by_filial') {
         openModal(data.data);
         return;
       } else if (data.action === 'get_deep_recording') {
@@ -83,13 +84,22 @@ function Home() {
   }, [data]); // Запускаем эффект при изменении данных
 
 
-  // Добавляем обработчик клика на ячейки из столбца "Активные окна"
-  const activeWindowsCells = document.querySelectorAll('#datatablesSimple tbody tr td:nth-child(2)');
-  activeWindowsCells.forEach(cell => {
-    cell.addEventListener('click', function() {
-      console.log(`Клик на ячейку "Активные окна" со значением "${this.innerText}"`);
+  useEffect(() => {
+    // Добавляем обработчики кликов на ячейки "Активные окна"
+    const activeWindowsCells = document.querySelectorAll('#datatablesSimple tbody tr td:nth-child(2)');
+    activeWindowsCells.forEach(cell => {
+      cell.addEventListener('click', function() {
+        const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
+        socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
+      });
     });
-  });
+    // Удаляем обработчики при размонтировании компонента
+    return () => {
+      activeWindowsCells.forEach(cell => {
+        cell.removeEventListener('click', () => {});
+      });
+    };
+  }, [data, socket]); // Запускаем эффект при изменении данных и сокета
 
 
   // Функция для открытия модального окна и заполнения данными
@@ -154,7 +164,7 @@ function Home() {
     socket.send(JSON.stringify({ action: 'get_deep_recording' }));
   };
 
-    const handleCellClick = (filialName) => {
+  const handleCellClick = (filialName) => {
     socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
   };
 
@@ -282,18 +292,7 @@ function Home() {
                       </tr>
                     </thead>
                     <tbody>
-                        {data.map(item => (
-              <tr key={item.filial_name}>
-                <td onClick={() => handleCellClick(item.filial_name)} style={{ cursor: 'pointer' }}>
-                  {item.filial_name}
-                </td>
-                <td>{item.active_windows_count}</td>
-                <td>{item.fact_active_windows_count}</td>
-                <td>{item.delay_by_windows}</td>
-                <td>{item.deep_recording}</td>
-                <td>{item.avg_time}</td>
-              </tr>
-            ))}
+                        {/* Добавляем данные через JS */}
                     </tbody>
                   </table>
                 </div>

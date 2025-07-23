@@ -75,11 +75,22 @@ function Home() {
         ]),
       },
     });
+
     setDataTable(table); // Сохраняем экземпляр DataTable
     return () => {
       table.destroy(); // Уничтожаем таблицу при размонтировании компонента
     };
   }, [data]); // Запускаем эффект при изменении данных
+
+
+  // Добавляем обработчик клика на ячейки из столбца "Активные окна"
+  const activeWindowsCells = document.querySelectorAll('#datatablesSimple tbody tr td:nth-child(2)');
+  activeWindowsCells.forEach(cell => {
+    cell.addEventListener('click', function() {
+      console.log(`Клик на ячейку "Активные окна" со значением "${this.innerText}"`);
+    });
+  });
+
 
   // Функция для открытия модального окна и заполнения данными
   const openModal = (data) => {
@@ -141,6 +152,10 @@ function Home() {
     // Обработчик клика для карточки "Простой по окнам"
   const handleDeepRecordingClick = () => {
     socket.send(JSON.stringify({ action: 'get_deep_recording' }));
+  };
+
+    const handleCellClick = (filialName) => {
+    socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
   };
 
   return (
@@ -267,16 +282,18 @@ function Home() {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((item, index) => (
-                        <tr key={index}>
-                          <td>{item.filial_name}</td>
-                          <td>{item.active_windows_count}</td>
-                          <td>{item.fact_active_windows_count}</td>
-                          <td>{item.delay_by_windows}</td>
-                          <td>{item.deep_recording}</td>
-                          <td>{item.avg_time}</td>
-                        </tr>
-                      ))}
+                        {data.map(item => (
+              <tr key={item.filial_name}>
+                <td onClick={() => handleCellClick(item.filial_name)} style={{ cursor: 'pointer' }}>
+                  {item.filial_name}
+                </td>
+                <td>{item.active_windows_count}</td>
+                <td>{item.fact_active_windows_count}</td>
+                <td>{item.delay_by_windows}</td>
+                <td>{item.deep_recording}</td>
+                <td>{item.avg_time}</td>
+              </tr>
+            ))}
                     </tbody>
                   </table>
                 </div>

@@ -72,7 +72,7 @@ function Home() {
           item.fact_active_windows_count,
           item.delay_by_windows,
           item.deep_recording,
-          item.avg_time,
+          Math.ceil(item.avg_time) + ' мин.',
         ]),
       },
     });
@@ -90,7 +90,7 @@ function Home() {
     activeWindowsCells.forEach(cell => {
       cell.addEventListener('click', function() {
         const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
-        socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
+        handleGetActiveWindowsByFilialClick(filialName);
       });
     });
     // Удаляем обработчики при размонтировании компонента
@@ -164,7 +164,7 @@ function Home() {
     socket.send(JSON.stringify({ action: 'get_deep_recording' }));
   };
 
-  const handleCellClick = (filialName) => {
+  const handleGetActiveWindowsByFilialClick = (filialName) => {
     socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
   };
 

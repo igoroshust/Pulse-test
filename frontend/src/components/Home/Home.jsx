@@ -206,9 +206,9 @@ function Home() {
                     <tbody>
                       {data.map((item, index) => (
                         <tr key={index}>
-                          <td>{item.filial}</td>
-                          <td>{item.active_windows}</td>
-                          <td>{item.fact_active_windows}</td>
+                          <td>{item.filial_name}</td>
+                          <td>{item.active_windows_count}</td>
+                          <td>{item.fact_active_windows_count}</td>
                           <td>{item.delay_by_windows}</td>
                           <td>{item.deep_recording}</td>
                           <td>{item.avg_time}</td>
@@ -248,7 +248,7 @@ function Home() {
                     <th>Окно</th>
                     <th>Оператор</th>
                     <th>Филиал</th>
-                    <th>Текущий статус</th>
+                    <th>Время</th>
                   </tr>
                 </thead>
                 <tbody id="modalTableBody">

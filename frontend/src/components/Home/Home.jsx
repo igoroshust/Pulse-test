@@ -21,8 +21,13 @@ function Home() {
       console.log('Полученные данные:', data);
 
       // Обработка данных
-      if (data.action === 'get_active_windows' || data.action === 'get_fact_active_windows' || data.action === 'get_delay_by_windows') {
+      if (data.action === 'get_active_windows' ||
+          data.action === 'get_fact_active_windows' ||
+           data.action === 'get_delay_by_windows') {
         openModal(data.data);
+        return;
+      } else if (data.action === 'get_deep_recording') {
+        openModal_deepRecording(data.data);
         return;
       }
 
@@ -65,6 +70,27 @@ function Home() {
     modal.show();
   };
 
+  // Функция для открытия модального окна (ГЛУБИНА ЗАПИСИ)
+    const openModal_deepRecording = (data) => {
+        const modalDeepRecordingTableBody = document.getElementById('modalDeepRecordingTableBody');
+        modalDeepRecordingTableBody.innerHTML = ''; // Очищаем предыдущие данные
+
+        data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.filial_name}</td>
+                    <td>${item.total_talons}</td>
+                    <td>${item.waiting_talons}</td>
+                    <td>${item.not_accepted_talons}</td>
+                `;
+                modalDeepRecordingTableBody.appendChild(row);
+        });
+
+        // Показываем модальное окно
+        const modal = new window.bootstrap.Modal(document.getElementById('dataModal-deepRecordingTable'));
+        modal.show();
+    }
+
   // Обработчик клика для карточки "Активные окна"
   const handleActiveWindowsClick = () => {
     socket.send(JSON.stringify({ action: 'get_active_windows' }));
@@ -78,6 +104,11 @@ function Home() {
   // Обработчик клика для карточки "Простой по окнам"
   const handleDelayByWindowsClick = () => {
     socket.send(JSON.stringify({ action: 'get_delay_by_windows' }));
+  };
+
+    // Обработчик клика для карточки "Простой по окнам"
+  const handleDeepRecordingClick = () => {
+    socket.send(JSON.stringify({ action: 'get_deep_recording' }));
   };
 
   return (
@@ -150,7 +181,7 @@ function Home() {
               </ol>
               <div className="row">
                 <div className="col-xl-3 col-md-6">
-                  <div className="card bg-primary text-white mb-4" id="deepRecordingTotal" onClick={handleActiveWindowsClick}>
+                  <div className="card bg-primary text-white mb-4" id="deepRecordingTotal" onClick={handleDeepRecordingClick}>
                     <div className="card-body">Глубина записи по талонам</div>
                     <div className="card-footer d-flex align-items-center justify-content-between">
                       <a className="small text-white stretched-link" href="#">Подробнее</a>
@@ -261,6 +292,36 @@ function Home() {
           </div>
         </div>
       </div>
+
+      {/*  Модальное окно для глубины записи по талонам (таблица) */}
+        <div className="modal fade" id="dataModal-deepRecordingTable" tabIndex="-1" aria-labelledby="dataModal-deepRecordingTable-Label" aria-hidden="true">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title" id="dataModal-deepRecordingTable-Label">Данные</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div className="modal-body">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Филиал</th>
+                                    <th>Обслужено</th>
+                                    <th>В очереди</th>
+                                    <th>Сброшено</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalDeepRecordingTableBody">
+                                {/* Добавляем данные через JS */}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
   );
 }

@@ -3,6 +3,11 @@ import { DataTable } from 'simple-datatables';
 
 import Footer from './../Footer/Footer';
 
+import Block from './../Block/Block';
+import ActiveWindowsBlock from './../Block/ActiveWindowsBlock/ActiveWindowsBlock';
+import ActiveWindowsModalContent from './../Block/ActiveWindowsBlock/ActiveWindowsModalContent';
+import Modal from './../Modal/Modal';
+
 const Home = () => {
   const [data, setData] = useState([]);
   const [selectedFilial, setSelectedFilial] = useState('');
@@ -14,6 +19,9 @@ const Home = () => {
   const [totalDelayByWindows, setTotalDelayByWindows] = useState(0); // Общее количество окон в простое
 
   const [timer, setTimer] = useState('');
+  const [modalData, setModalData] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
 
   useEffect(() => {
     // Устанавливаем WebSocket соединение
@@ -31,7 +39,7 @@ const Home = () => {
 
       // Обработка данных
       if (data.action === 'get_active_windows' ||
-          data.action === 'get_fact_active_windows' ||
+            data.action === 'get_fact_active_windows' ||
            data.action === 'get_delay_by_windows' ||
            data.action === 'get_active_windows_by_filial' ||
            data.action === 'get_fact_active_windows_by_filial' ||
@@ -261,15 +269,9 @@ const Home = () => {
                     </div>
                   </div>
                 </div>
-                <div className="col-xl-3 col-md-6">
-                  <div className="card bg-warning text-white mb-4" id="activeWindowsCard" onClick={handleActiveWindowsClick}>
-                    <div className="card-body">Активные окна</div>
-                    <div className="card-footer d-flex align-items-center justify-content-between">
-                      <a className="small text-white stretched-link" href="#">{totalActiveWindows}</a>
-                      <div className="small text-white"><i className="fas fa-angle-right"></i></div>
-                    </div>
-                  </div>
-                </div>
+
+                <ActiveWindowsBlock totalActiveWindows={totalActiveWindows} onClick={handleActiveWindowsClick}/>
+
                 <div className="col-xl-3 col-md-6">
                   <div className="card bg-success text-white mb-4" id="activeSessionsCard" onClick={handleActiveSessionsClick}>
                     <div className="card-body">Действующие окна</div>

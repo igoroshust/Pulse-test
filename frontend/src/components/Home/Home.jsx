@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// import '../../scripts/update-timer.js';
 import { DataTable } from 'simple-datatables';
 
 import Footer from './../Footer/Footer';
@@ -13,6 +12,8 @@ const Home = () => {
   const [totalActiveWindows, setTotalActiveWindows] = useState(0); // Общее количество активных окон
   const [totalFactActiveWindows, setTotalFactActiveWindows] = useState(0); // Общее количество действующий окон
   const [totalDelayByWindows, setTotalDelayByWindows] = useState(0); // Общее количество окон в простое
+
+  const [timer, setTimer] = useState('');
 
   useEffect(() => {
     // Устанавливаем WebSocket соединение
@@ -79,6 +80,23 @@ const Home = () => {
     return () => {
       newSocket.close();
     };
+  }, []); // Пустой массив зависимостей, чтобы выполнить эффект только один раз при монтировании
+
+  useEffect(() => {
+    // Функция для обновления таймера
+    const updateTimer = () => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const currentTime = `${hours}:${minutes}:${seconds}`;
+      setTimer(currentTime); // Обновляем состояние таймера
+    };
+    // Устанавливаем начальное значение таймера
+    updateTimer();
+    // Обновляем таймер каждую секунду
+    const intervalId = setInterval(updateTimer, 1000);
+    return () => clearInterval(intervalId); // Очищаем интервал при размонтировании компонента
   }, []); // Пустой массив зависимостей, чтобы выполнить эффект только один раз при монтировании
 
   useEffect(() => {
@@ -274,7 +292,7 @@ const Home = () => {
               <div className="card mb-4">
                 <div className="card-header">
                   <div><i className="fas fa-table me-1"></i> Информация по филиалам</div>
-                  <div id="timer">00:00:00</div>
+                  <div id="timer">{timer}</div>
                 </div>
                 <div className="card-body">
                   <table id="datatablesSimple">

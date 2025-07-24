@@ -26,7 +26,8 @@ function Home() {
       if (data.action === 'get_active_windows' ||
           data.action === 'get_fact_active_windows' ||
            data.action === 'get_delay_by_windows' ||
-           data.action === 'get_active_windows_by_filial') {
+           data.action === 'get_active_windows_by_filial' ||
+           data.action === 'get_fact_active_windows_by_filial') {
         openModal(data.data);
         return;
       } else if (data.action === 'get_deep_recording') {
@@ -101,6 +102,24 @@ function Home() {
     };
   }, [data, socket]); // Запускаем эффект при изменении данных и сокета
 
+    useEffect(() => {
+    // Добавляем обработчики кликов на ячейки "Активные окна"
+    const factActiveWindowsCells = document.querySelectorAll('#datatablesSimple tbody tr td:nth-child(3)');
+    factActiveWindowsCells.forEach(cell => {
+      cell.addEventListener('click', function() {
+        const filialName = this.closest('tr').cells[0].textContent; // Получаем имя филиала
+        handleGetFactActiveWindowsByFilial(filialName);
+      });
+    });
+    // Удаляем обработчики при размонтировании компонента
+    return () => {
+      factActiveWindowsCells.forEach(cell => {
+        cell.removeEventListener('click', () => {});
+      });
+    };
+  }, [data, socket]); // Запускаем эффект при изменении данных и сокета
+
+
 
   // Функция для открытия модального окна и заполнения данными
   const openModal = (data) => {
@@ -166,6 +185,10 @@ function Home() {
 
   const handleGetActiveWindowsByFilialClick = (filialName) => {
     socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
+  };
+
+  const handleGetFactActiveWindowsByFilial = (filialName) => {
+    socket.send(JSON.stringify({ action: 'get_fact_active_windows_by_filial', filial: filialName }));
   };
 
   return (

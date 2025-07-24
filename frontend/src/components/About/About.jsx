@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import Footer from './../Footer/Footer';
+
 function About() {
   const [filial, setFilial] = useState('');
   const [date, setDate] = useState('');
@@ -74,68 +76,7 @@ function About() {
 
   return (
     <div>
-      <nav className="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <div><a href="./index.html"><img src="./assets/img/logo-transparent.png" alt="mfc-logo" className="logo logo-header" /></a></div>
-        <a className="navbar-brand ps-3" href="./index.html">Пульс</a>
-        <button className="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i className="fas fa-bars"></i></button>
-        <form className="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-          <div className="input-group"></div>
-        </form>
-        <ul className="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-          <li className="nav-item dropdown">
-            <a className="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i className="fas fa-user fa-fw"></i></a>
-            <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li><a className="dropdown-item" href="#!">Настройки</a></li>
-              <li><a className="dropdown-item" href="#!">Журнал</a></li>
-              <li><hr className="dropdown-divider" /></li>
-              <li><a className="dropdown-item" href="#!">Выйти</a></li>
-            </ul>
-          </li>
-        </ul>
-      </nav>
       <div id="layoutSidenav">
-        <div id="layoutSidenav_nav">
-          <nav className="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-            <div className="sb-sidenav-menu">
-              <div className="nav">
-                <div className="sb-sidenav-menu-heading">Навигация</div>
-                <a className="nav-link" href="./index.html">
-                  <div className="sb-nav-link-icon"><i className="fas fa-tachometer"></i></div>
-                  Главная
-                </a>
-                <a className="nav-link" href="./about-page.html">
-                  <div className="sb-nav-link-icon"><i className="fas fa-tachometer-alt"></i></div>
-                  О филиале
-                </a>
-                <div className="sb-sidenav-menu-heading">Интерфейс</div>
-                <a className="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                  <div className="sb-nav-link-icon"><i className="fas fa-columns"></i></div>
-                  Настройки
-                  <div className="sb-sidenav-collapse-arrow"><i className="fas fa-angle-down"></i></div>
-                </a>
-                <div className="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                  <nav className="sb-sidenav-menu-nested nav">
-                    <a className="nav-link" href="layout-static.html">Static Navigation</a>
-                    <a className="nav-link" href="layout-sidenav-light.html">Light Sidenav</a>
-                  </nav>
-                </div>
-                <div className="sb-sidenav-menu-heading">Дополнительно</div>
-                <a className="nav-link" href="charts.html">
-                  <div className="sb-nav-link-icon"><i className="fas fa-chart-area"></i></div>
-                  Графики
-                </a>
-                <a className="nav-link" href="tables.html">
-                  <div className="sb-nav-link-icon"><i className="fas fa-table"></i></div>
-                  Таблицы
-                </a>
-              </div>
-            </div>
-            <div className="sb-sidenav-footer">
-              <div className="small">Пользователь:</div>
-              Тестов Тест Тестович
-            </div>
-          </nav>
-        </div>
         <div id="layoutSidenav_content">
           <main>
             <div className="container-fluid px-4">
@@ -182,16 +123,9 @@ function About() {
               </div>
             </div>
           </main>
-          <footer className="py-4 bg-light mt-auto">
-            <div className="container-fluid px-4">
-              <div className="d-flex align-items-center justify-content-between small">
-                <div className="text-muted">Разработано &copy; ОПТ </div>
-                <div>
-                  <a href="#">Политика конфиденциальности</a>
-                </div>
-              </div>
-            </div>
-          </footer>
+
+         <Footer />
+
         </div>
       </div>
 

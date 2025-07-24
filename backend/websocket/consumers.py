@@ -33,7 +33,7 @@ class MainPageConsumer(AsyncWebsocketConsumer):
     async def check_for_changes(self):
         """Проверка изменений в базе данных"""
         while True:
-            await asyncio.sleep(5000000000)
+            await asyncio.sleep(5000000000000)
             current_data = await self.get_data()
             await self.send(text_data=json.dumps({'data': current_data}, cls=CustomJSONEncoder))
             # await self.get_data() # Обновление кэша

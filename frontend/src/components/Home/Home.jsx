@@ -5,7 +5,10 @@ import Footer from './../Footer/Footer';
 
 import Block from './../Block/Block';
 import ActiveWindowsBlock from './../Block/ActiveWindowsBlock/ActiveWindowsBlock';
-import ActiveWindowsModalContent from './../Block/ActiveWindowsBlock/ActiveWindowsModalContent';
+import DeepRecordingBlock from './../Block/DeepRecordingBlock/DeepRecordingBlock';
+import FactActiveWindowsBlock from './../Block/FactActiveWindowsBlock/FactActiveWindowsBlock';
+import DelayByWindowsBlock from './../Block/DelayByWindowsBlock/DelayByWindowsBlock';
+
 import Modal from './../Modal/Modal';
 
 const Home = () => {
@@ -124,6 +127,7 @@ const Home = () => {
     { className: 'filial-avg-time', action: 'get_avg_time_by_filial' },
   ];
 
+
   data.forEach(item => {
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -234,7 +238,7 @@ const Home = () => {
   };
 
   // Обработчик клика для карточки "Действующие окна"
-  const handleActiveSessionsClick = () => {
+  const handleFactActiveWindowsClick = () => {
     socket.send(JSON.stringify({ action: 'get_fact_active_windows' }));
   };
 
@@ -260,37 +264,18 @@ const Home = () => {
                 <li className="breadcrumb-item active">Статистика</li>
               </ol>
               <div className="row">
-                <div className="col-xl-3 col-md-6">
-                  <div className="card bg-primary text-white mb-4" id="deepRecordingTotal" onClick={handleDeepRecordingClick}>
-                    <div className="card-body">Глубина записи по талонам</div>
-                    <div className="card-footer d-flex align-items-center justify-content-between">
-                      <a className="small text-white stretched-link" href="#">Подробнее</a>
-                      <div className="small text-white"><i className="fas fa-angle-right"></i></div>
-                    </div>
-                  </div>
-                </div>
+
+                <DeepRecordingBlock onClick={handleDeepRecordingClick} />
 
                 <ActiveWindowsBlock totalActiveWindows={totalActiveWindows} onClick={handleActiveWindowsClick}/>
 
-                <div className="col-xl-3 col-md-6">
-                  <div className="card bg-success text-white mb-4" id="activeSessionsCard" onClick={handleActiveSessionsClick}>
-                    <div className="card-body">Действующие окна</div>
-                    <div className="card-footer d-flex align-items-center justify-content-between">
-                      <a className="small text-white stretched-link" href="#">{totalFactActiveWindows}</a>
-                      <div className="small text-white"><i className="fas fa-angle-right"></i></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-xl-3 col-md-6">
-                  <div className="card bg-danger text-white mb-4" id="delayByWindows" onClick={handleDelayByWindowsClick}>
-                    <div className="card-body">Простой по окнам</div>
-                    <div className="card-footer d-flex align-items-center justify-content-between">
-                      <a className="small text-white stretched-link" href="#">{totalDelayByWindows}</a>
-                      <div className="small text-white"><i className="fas fa-angle-right"></i></div>
-                    </div>
-                  </div>
-                </div>
+                <FactActiveWindowsBlock totalFactActiveWindows={totalFactActiveWindows} onClick={handleFactActiveWindowsClick} />
+
+                <DelayByWindowsBlock totalDelayByWindows={totalDelayByWindows} onClick={handleDelayByWindowsClick} />
+
               </div>
+
+
               <div className="card mb-4">
                 <div className="card-header">
                   <div><i className="fas fa-table me-1"></i> Информация по филиалам</div>

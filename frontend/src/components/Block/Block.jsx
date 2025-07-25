@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Block = ({title, value, onClick, bgColor}) => {
+const Block = ({ title, value, onClick, bgColor }) => {
     return (
                <div className={`col-xl-3 col-md-6`}>
                   <div className={`card ${bgColor} text-white mb-4`} onClick={onClick}>

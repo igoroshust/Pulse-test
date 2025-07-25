@@ -7,11 +7,11 @@ const Sidebar = () => {
                 <div class="sb-sidenav-menu">
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Навигация</div>
-                        <a class="nav-link" href="./index.html">
+                        <a class="nav-link" href="/">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer"></i></div>
                             Главная
                         </a>
-                        <a class="nav-link" href="./about-page.html">
+                        <a class="nav-link" href="./about-page">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             О филиале
                         </a>
@@ -59,11 +59,11 @@ const Sidebar = () => {
                             </nav>
                         </div>
                         <div class="sb-sidenav-menu-heading">Дополнительно</div>
-                        <a class="nav-link" href="charts.html">
+                        <a class="nav-link" href="#">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Графики
                         </a>
-                        <a class="nav-link" href="tables.html">
+                        <a class="nav-link" href="#">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                             Таблицы
                         </a>

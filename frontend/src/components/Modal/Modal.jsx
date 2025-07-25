@@ -1,5 +1,5 @@
 import React from 'react';
-import './Modal.css'; // Импортируйте CSS для стилизации
+import './../../styles/styles.css';
 
 const Modal = ({ id, title, children, isOpen, onClose }) => {
     if (!isOpen) return null; // Если модальное окно не открыто, ничего не рендерим

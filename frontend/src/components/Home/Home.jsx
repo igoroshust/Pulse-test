@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DataTable } from 'simple-datatables';
+import { defaultConfig } from './../../config/config.ts';
 
 import Footer from './../Footer/Footer';
 import Block from './../Block/Block';
@@ -7,7 +8,10 @@ import ActiveWindowsBlock from './../Block/ActiveWindowsBlock/ActiveWindowsBlock
 import DeepRecordingBlock from './../Block/DeepRecordingBlock/DeepRecordingBlock';
 import FactActiveWindowsBlock from './../Block/FactActiveWindowsBlock/FactActiveWindowsBlock';
 import DelayByWindowsBlock from './../Block/DelayByWindowsBlock/DelayByWindowsBlock';
-import ActiveWindowsBlockModal from './../Modal/ActiveWindowsBlockModal/ActiveWindowsBlockModal'; // Импортируйте ваш новый компонент
+
+import ActiveWindowsBlockModal from './../Modal/ActiveWindowsBlockModal/ActiveWindowsBlockModal';
+import DeepRecordingBlockModal from './../Modal/DeepRecordingBlockModal/DeepRecordingBlockModal';
+import AvgTimeModal from './../Modal/AvgTimeModal/AvgTimeModal';
 
 const Home = () => {
   const [data, setData] = useState([]);
@@ -18,8 +22,7 @@ const Home = () => {
   const [totalDelayByWindows, setTotalDelayByWindows] = useState(0);
   const [timer, setTimer] = useState('');
   const [modalData, setModalData] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
+  const [activeModal, setActiveModal] = useState(null); // Для управления открытием модальных окон
 
   useEffect(() => {
     const newSocket = new WebSocket('ws://localhost:5050/ws/information_updates/');
@@ -34,20 +37,15 @@ const Home = () => {
       const data = JSON.parse(event.data);
       console.log('Полученные данные:', data);
 
-      if (data.action === 'get_active_windows' ||
-          data.action === 'get_fact_active_windows' ||
-          data.action === 'get_delay_by_windows' ||
-          data.action === 'get_active_windows_by_filial' ||
-          data.action === 'get_fact_active_windows_by_filial' ||
-          data.action === 'get_delay_by_windows_by_filial') {
-        openModal(data.data, 'Данные по активным окнам');
+      // Обработка данных и открытие модальных окон
+      if (data.action === 'get_active_windows' || data.action === 'get_fact_active_windows' || data.action === 'get_delay_by_windows' || data.action === 'get_active_windows_by_filial' || data.action === 'get_fact_active_windows_by_filial' || data.action === 'get_delay_by_windows_by_filial') {
+        openModal(data.data, 'active');
         return;
-      } else if (data.action === 'get_deep_recording' ||
-                 data.action === 'get_deep_recording_by_filial') {
-        openModal(data.data, 'Глубина записи');
+      } else if (data.action === 'get_deep_recording' || data.action === 'get_deep_recording_by_filial') {
+        openModal(data.data, 'deep');
         return;
       } else if (data.action === 'get_avg_time_by_filial') {
-        openModal(data.data, 'Среднее время ожидания');
+        openModal(data.data, 'avg');
         return;
       }
 
@@ -146,6 +144,7 @@ const Home = () => {
     });
 
     const table = new DataTable('#datatablesSimple', {
+        ...defaultConfig, // Подгружаем изменённые настройки конфигурации (русификация)
       data: {
         headings: [
           'Филиал',
@@ -164,14 +163,13 @@ const Home = () => {
     };
   }, [data]);
 
-  const openModal = (data, title) => {
+  const openModal = (data, type) => {
     setModalData(data);
-    setModalTitle(title);
-    setIsModalOpen(true);
+    setActiveModal(type); // Устанавливаем тип модального окна
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
+    setActiveModal(null); // Закрываем модальное окно
   };
 
   return (
@@ -222,7 +220,15 @@ const Home = () => {
       </div>
 
       {/* Модальное окно для отображения данных */}
-      <ActiveWindowsBlockModal data={modalData} isOpen={isModalOpen} onClose={closeModal} />
+      {activeModal === 'active' && (
+        <ActiveWindowsBlockModal data={modalData} isOpen={true} onClose={closeModal} />
+      )}
+      {activeModal === 'deep' && (
+        <DeepRecordingBlockModal data={modalData} isOpen={true} onClose={closeModal} />
+      )}
+      {activeModal === 'avg' && (
+          <AvgTimeModal data={modalData} isOpen={true} onClose={closeModal} />
+      )}
     </div>
   );
 }

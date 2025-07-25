@@ -14,14 +14,17 @@ import DeepRecordingBlockModal from './../Modal/DeepRecordingBlockModal/DeepReco
 import AvgTimeModal from './../Modal/AvgTimeModal/AvgTimeModal';
 
 const Home = () => {
-  const [data, setData] = useState([]);
-  const [socket, setSocket] = useState(null);
-  const [dataTable, setDataTable] = useState(null);
-  const [totalActiveWindows, setTotalActiveWindows] = useState(0);
-  const [totalFactActiveWindows, setTotalFactActiveWindows] = useState(0);
-  const [totalDelayByWindows, setTotalDelayByWindows] = useState(0);
-  const [timer, setTimer] = useState('');
-  const [modalData, setModalData] = useState([]);
+
+  const [data, setData] = useState([]); // Данные с бэкенда
+  const [timer, setTimer] = useState(''); // Таймер в таблице
+  const [socket, setSocket] = useState(null);  // WS-соединение
+  const [dataTable, setDataTable] = useState(null); // Таблица
+
+  const [totalActiveWindows, setTotalActiveWindows] = useState(0); // Все активные окна
+  const [totalFactActiveWindows, setTotalFactActiveWindows] = useState(0); // Все действующие окна
+  const [totalDelayByWindows, setTotalDelayByWindows] = useState(0); // Все простаивающие окна
+
+  const [modalData, setModalData] = useState([]); // Модальное окно
   const [activeModal, setActiveModal] = useState(null); // Для управления открытием модальных окон
 
   useEffect(() => {
@@ -37,22 +40,33 @@ const Home = () => {
       const data = JSON.parse(event.data);
       console.log('Полученные данные:', data);
 
-      // Обработка данных и открытие модальных окон
-      if (data.action === 'get_active_windows' || data.action === 'get_fact_active_windows' || data.action === 'get_delay_by_windows' || data.action === 'get_active_windows_by_filial' || data.action === 'get_fact_active_windows_by_filial' || data.action === 'get_delay_by_windows_by_filial') {
-        openModal(data.data, 'active');
-        return;
-      } else if (data.action === 'get_deep_recording' || data.action === 'get_deep_recording_by_filial') {
-        openModal(data.data, 'deep');
-        return;
-      } else if (data.action === 'get_avg_time_by_filial') {
-        openModal(data.data, 'avg');
-        return;
-      }
+      // Отображение содержимого модалки исходя их контекста
+      switch (data.action) {
+            case 'get_active_windows':
+            case 'get_fact_active_windows':
+            case 'get_delay_by_windows':
+            case 'get_active_windows_by_filial':
+            case 'get_fact_active_windows_by_filial':
+            case 'get_delay_by_windows_by_filial':
+                openModal(data.data, 'active');
+                return;
 
+            case 'get_deep_recording':
+            case 'get_deep_recording_by_filial':
+                openModal(data.data, 'deep');
+                return;
+
+            case 'get_avg_time_by_filial':
+               openModal(data.data, 'avg');
+               return;
+      };
+
+      // Обновляем состояние полученных данных
       setData(data.data);
-      let activeWindowsSum = 0;
-      let factActiveWindowsSum = 0;
-      let delayByWindowsSum = 0;
+
+      let activeWindowsSum = 0; // Общее количество активных окон
+      let factActiveWindowsSum = 0; // Общее количество действующих окон
+      let delayByWindowsSum = 0; // Общее количество простоя по окнам
 
       data.data.forEach(item => {
         activeWindowsSum += item.active_windows_count;
@@ -79,20 +93,27 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+
+    // Таймер в таблице
     const updateTimer = () => {
+
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
       const currentTime = `${hours}:${minutes}:${seconds}`;
+
       setTimer(currentTime);
     };
+
     updateTimer();
+
     const intervalId = setInterval(updateTimer, 1000);
     return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
+      // Создаём таблицу "Информация по филиалам"
     if (dataTable) {
       dataTable.destroy();
     }
@@ -112,31 +133,31 @@ const Home = () => {
       `;
       tableBody.appendChild(row);
 
-      // Добавляем обработчик клика для ячейки "Активные окна"
+      // Добавляем обработчик клика для ячейки "Активные окна" (внутри таблицы)
       const activeWindowsCell = row.querySelector('.filial-active-windows-count');
       activeWindowsCell.addEventListener('click', () => {
         socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: item.filial_name }));
       });
 
-      // Добавляем обработчик клика для ячейки "Действующие окна"
+      // Добавляем обработчик клика для ячейки "Действующие окна" (внутри таблицы)
       const factActiveWindowsCell = row.querySelector('.filial-fact-active-windows-count');
       factActiveWindowsCell.addEventListener('click', () => {
         socket.send(JSON.stringify({ action: 'get_fact_active_windows_by_filial', filial: item.filial_name }));
       });
 
-      // Добавляем обработчик клика для ячейки "Простой по окнам"
+      // Добавляем обработчик клика для ячейки "Простой по окнам" (внутри таблицы)
       const delayByWindowsCell = row.querySelector('.filial-delay-by-windows');
       delayByWindowsCell.addEventListener('click', () => {
         socket.send(JSON.stringify({ action: 'get_delay_by_windows_by_filial', filial: item.filial_name }));
       });
 
-      // Добавляем обработчик клика для ячейки "Глубина записи"
+      // Добавляем обработчик клика для ячейки "Глубина записи" (внутри таблицы)
       const deepRecordingCell = row.querySelector('.filial-deep-recording');
       deepRecordingCell.addEventListener('click', () => {
         socket.send(JSON.stringify({ action: 'get_deep_recording_by_filial', filial: item.filial_name }));
       });
 
-      // Добавляем обработчик клика для ячейки "Среднее время"
+      // Добавляем обработчик клика для ячейки "Среднее время" (внутри таблицы)
       const avgTimeCell = row.querySelector('.filial-avg-time');
       avgTimeCell.addEventListener('click', () => {
         socket.send(JSON.stringify({ action: 'get_avg_time_by_filial', filial: item.filial_name }));
@@ -146,6 +167,7 @@ const Home = () => {
     const table = new DataTable('#datatablesSimple', {
         ...defaultConfig, // Подгружаем изменённые настройки конфигурации (русификация)
       data: {
+          // Формируем заголовки для таблицы
         headings: [
           'Филиал',
           'Активные окна',
@@ -183,10 +205,19 @@ const Home = () => {
                 <li className="breadcrumb-item active">Статистика</li>
               </ol>
               <div className="row">
+
+                {/* Глубина записи по талонам */}
                 <DeepRecordingBlock onClick={() => socket.send(JSON.stringify({ action: 'get_deep_recording' }))} />
+
+                {/* Активные окна */}
                 <ActiveWindowsBlock totalActiveWindows={totalActiveWindows} onClick={() => socket.send(JSON.stringify({ action: 'get_active_windows' }))} />
+
+                {/* Действующие окна */}
                 <FactActiveWindowsBlock totalFactActiveWindows={totalFactActiveWindows} onClick={() => socket.send(JSON.stringify({ action: 'get_fact_active_windows' }))} />
+
+                {/* Простой по окнам */}
                 <DelayByWindowsBlock totalDelayByWindows={totalDelayByWindows} onClick={() => socket.send(JSON.stringify({ action: 'get_delay_by_windows' }))} />
+
               </div>
 
               <div className="card mb-4">
@@ -194,8 +225,10 @@ const Home = () => {
                   <div><i className="fas fa-table me-1"></i> Информация по филиалам</div>
                   <div id="timer">{timer}</div>
                 </div>
+
                 <div className="card-body">
                   <table id="datatablesSimple">
+
                     <thead>
                       <tr>
                         <th>Филиал</th>
@@ -206,6 +239,7 @@ const Home = () => {
                         <th>Среднее время ожидания</th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {/* Данные добавляются через JS */}
                     </tbody>
@@ -219,7 +253,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Модальное окно для отображения данных */}
+      {/* Модальное окно для отображения данных (исходя из категории действия в switch)*/}
       {activeModal === 'active' && (
         <ActiveWindowsBlockModal data={modalData} isOpen={true} onClose={closeModal} />
       )}

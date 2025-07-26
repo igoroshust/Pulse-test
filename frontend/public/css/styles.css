@@ -1306,6 +1306,7 @@ progress {
     width: 41.66666667%;
   }
   .col-lg-6 {
+    margin-top: 5rem;
     flex: 0 0 auto;
     width: 50%;
   }
@@ -7685,7 +7686,7 @@ textarea.form-control-lg {
 }
 
 .mb-0 {
-  margin-bottom: 0 !important;
+  margin-bottom: 0.5rem !important;
 }
 
 .mb-1 {

@@ -13,8 +13,7 @@ import ActiveWindowsBlockModal from './../Modal/ActiveWindowsBlockModal/ActiveWi
 import DeepRecordingBlockModal from './../Modal/DeepRecordingBlockModal/DeepRecordingBlockModal';
 import AvgTimeModal from './../Modal/AvgTimeModal/AvgTimeModal';
 
-const Home = () => {
-
+const Main = () => {
   const [data, setData] = useState([]); // Данные с бэкенда
   const [timer, setTimer] = useState(''); // Таймер в таблице
   const [socket, setSocket] = useState(null);  // WS-соединение
@@ -93,97 +92,74 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+  // Создаём таблицу "Информация по филиалам"
+  if (dataTable) {
+    dataTable.destroy();
+  }
 
-    // Таймер в таблице
-    const updateTimer = () => {
+  const tableBody = document.getElementById('datatablesSimple').querySelector('tbody');
+  tableBody.innerHTML = '';
 
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const currentTime = `${hours}:${minutes}:${seconds}`;
+  data.forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="filial-name">${item.filial_name}</td>
+      <td class="filial-active-windows-count">${item.active_windows_count}</td>
+      <td class="filial-fact-active-windows-count">${item.fact_active_windows_count}</td>
+      <td class="filial-delay-by-windows">${item.delay_by_windows}</td>
+      <td class="filial-deep-recording">${item.deep_recording + ' человек(-а)' || 'Неизвестно'}</td>
+      <td class="filial-avg-time">${Math.ceil(item.avg_time)} мин.</td>
+    `;
+    tableBody.appendChild(row);
+  });
 
-      setTimer(currentTime);
-    };
+  const table = new DataTable('#datatablesSimple', {
+    ...defaultConfig,
+    data: {
+      headings: [
+        'Филиал',
+        'Активные окна',
+        'Действующие окна',
+        'Простой по окнам',
+        'Глубина записи по талонам',
+        'Среднее время ожидания',
+      ]
+    },
+  });
 
-    updateTimer();
+  // Добавляем делегированный обработчик событий на tbody
+  tableBody.addEventListener('click', (event) => {
+    const target = event.target;
 
-    const intervalId = setInterval(updateTimer, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
+    if (target.classList.contains('filial-active-windows-count')) {
+        const filialName = target.closest('tr').querySelector('.filial-name').textContent;
+        socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: filialName }));
 
-  useEffect(() => {
-      // Создаём таблицу "Информация по филиалам"
-    if (dataTable) {
-      dataTable.destroy();
-    }
+      } else if (target.classList.contains('filial-fact-active-windows-count')) {
+          const filialName = target.closest('tr').querySelector('.filial-name').textContent;
+          socket.send(JSON.stringify({ action: 'get_fact_active_windows_by_filial', filial: filialName }));
 
-    const tableBody = document.getElementById('datatablesSimple').querySelector('tbody');
-    tableBody.innerHTML = '';
+      } else if (target.classList.contains('filial-delay-by-windows')) {
+          const filialName = target.closest('tr').querySelector('.filial-name').textContent;
+          socket.send(JSON.stringify({ action: 'get_delay_by_windows_by_filial', filial: filialName }));
 
-    data.forEach(item => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td class="filial-name">${item.filial_name}</td>
-        <td class="filial-active-windows-count">${item.active_windows_count}</td>
-        <td class="filial-fact-active-windows-count">${item.fact_active_windows_count}</td>
-        <td class="filial-delay-by-windows">${item.delay_by_windows}</td>
-        <td class="filial-deep-recording">${item.deep_recording + ' человек(-а)' || 'Неизвестно'}</td>
-        <td class="filial-avg-time">${Math.ceil(item.avg_time)} мин.</td>
-      `;
-      tableBody.appendChild(row);
+      } else if (target.classList.contains('filial-deep-recording')) {
+          const filialName = target.closest('tr').querySelector('.filial-name').textContent;
+          socket.send(JSON.stringify({ action: 'get_deep_recording_by_filial', filial: filialName }));
 
-      // Добавляем обработчик клика для ячейки "Активные окна" (внутри таблицы)
-      const activeWindowsCell = row.querySelector('.filial-active-windows-count');
-      activeWindowsCell.addEventListener('click', () => {
-        socket.send(JSON.stringify({ action: 'get_active_windows_by_filial', filial: item.filial_name }));
-      });
+      } else if (target.classList.contains('filial-avg-time')) {
+          const filialName = target.closest('tr').querySelector('.filial-name').textContent;
+          socket.send(JSON.stringify({ action: 'get_avg_time_by_filial', filial: filialName }));
+      }
 
-      // Добавляем обработчик клика для ячейки "Действующие окна" (внутри таблицы)
-      const factActiveWindowsCell = row.querySelector('.filial-fact-active-windows-count');
-      factActiveWindowsCell.addEventListener('click', () => {
-        socket.send(JSON.stringify({ action: 'get_fact_active_windows_by_filial', filial: item.filial_name }));
-      });
+  });
 
-      // Добавляем обработчик клика для ячейки "Простой по окнам" (внутри таблицы)
-      const delayByWindowsCell = row.querySelector('.filial-delay-by-windows');
-      delayByWindowsCell.addEventListener('click', () => {
-        socket.send(JSON.stringify({ action: 'get_delay_by_windows_by_filial', filial: item.filial_name }));
-      });
+  setDataTable(table);
+  return () => {
+    table.destroy();
+  };
+}, [data]);
 
-      // Добавляем обработчик клика для ячейки "Глубина записи" (внутри таблицы)
-      const deepRecordingCell = row.querySelector('.filial-deep-recording');
-      deepRecordingCell.addEventListener('click', () => {
-        socket.send(JSON.stringify({ action: 'get_deep_recording_by_filial', filial: item.filial_name }));
-      });
-
-      // Добавляем обработчик клика для ячейки "Среднее время" (внутри таблицы)
-      const avgTimeCell = row.querySelector('.filial-avg-time');
-      avgTimeCell.addEventListener('click', () => {
-        socket.send(JSON.stringify({ action: 'get_avg_time_by_filial', filial: item.filial_name }));
-      });
-    });
-
-    const table = new DataTable('#datatablesSimple', {
-        ...defaultConfig, // Подгружаем изменённые настройки конфигурации (русификация)
-      data: {
-          // Формируем заголовки для таблицы
-        headings: [
-          'Филиал',
-          'Активные окна',
-          'Действующие окна',
-          'Простой по окнам',
-          'Глубина записи по талонам',
-          'Среднее время ожидания',
-        ]
-      },
-    });
-
-    setDataTable(table);
-    return () => {
-      table.destroy();
-    };
-  }, [data]);
 
   const openModal = (data, type) => {
     setModalData(data);
@@ -253,7 +229,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Модальное окно для отображения данных (исходя из категории действия в switch)*/}
+      {/* Модальное окно для отображения данных (исходя из категории действия в switch) */}
       {activeModal === 'active' && (
         <ActiveWindowsBlockModal data={modalData} isOpen={true} onClose={closeModal} />
       )}
@@ -267,4 +243,4 @@ const Home = () => {
   );
 }
 
-export default Home;
+export default Main;

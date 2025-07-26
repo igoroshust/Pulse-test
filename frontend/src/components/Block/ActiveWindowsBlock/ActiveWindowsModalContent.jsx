@@ -1,4 +1,3 @@
-// ActiveWindowsModalContent.js
 import React from 'react';
 
 const ActiveWindowsModalContent = ({ data }) => {

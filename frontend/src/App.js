@@ -3,7 +3,8 @@ import { useState } from 'react';
 
 import Header from './components/Header/Header';
 import Sidebar from './components/Sidebar/Sidebar';
-import Home from './components/Home/Home';
+// import Home from './components/Home/Home';
+import Main from './components/Main/Main';
 import About from './components/About/About';
 import Navbar from './components/Navbar/Navbar';
 
@@ -24,7 +25,7 @@ function App() {
         <Header toggleSidebar={toggleSidebar} />
 
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Main />} />
             <Route path="/about-page" element={<About />} />
         </Routes>
 

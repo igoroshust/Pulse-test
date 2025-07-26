@@ -3,7 +3,6 @@ import { DataTable } from 'simple-datatables';
 import { defaultConfig } from './../../config/config.ts';
 
 import Footer from './../Footer/Footer';
-import Block from './../Block/Block';
 import ActiveWindowsBlock from './../Block/ActiveWindowsBlock/ActiveWindowsBlock';
 import DeepRecordingBlock from './../Block/DeepRecordingBlock/DeepRecordingBlock';
 import FactActiveWindowsBlock from './../Block/FactActiveWindowsBlock/FactActiveWindowsBlock';
@@ -90,6 +89,24 @@ const Main = () => {
       newSocket.close();
     };
   }, []);
+
+  // Таймер в таблице
+  useEffect(() => {
+    const updateTimer = () => {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}:${seconds}`;
+        setTimer(currentTime); // Обновляем состояние таймера
+    };
+    // Устанавливаем новое значение таймера
+    updateTimer();
+
+    // Обновляем таймер каждую секунду
+    const intervalId = setInterval(updateTimer, 1000);
+    return () => clearInterval(intervalId);
+  }, []); // Пустой массив зависимостей для выполнения эффекта единожды при монтировании
 
   useEffect(() => {
   // Создаём таблицу "Информация по филиалам"

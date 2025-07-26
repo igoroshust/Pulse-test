@@ -5,7 +5,8 @@ import Header from './../Header/Header';
 import Sidebar from './../Sidebar/Sidebar';
 import Main from './../Main/Main';
 import About from './../About/About';
-import Navbar from './../Navbar/Navbar';
+import NotFoundPage from './../NotFoundPage/NotFoundPage';
+import PrivacyPolicy from './../PrivacyPolicy/PrivacyPolicy';
 
 const TitleUpdater = () => {
     const location = useLocation();
@@ -17,6 +18,9 @@ const TitleUpdater = () => {
                 break;
             case '/about-page':
                 document.title = "Информация о филиале";
+                break;
+            case '/privacy-policy':
+                document.title = "Политика конфиденциальности";
                 break;
             default:
                 document.title = "Страница не найдена";
@@ -40,7 +44,6 @@ const AppRouter = () => {
     return (
         <Router>
             <div className={`App ${isSidebarToggled ? 'sb-sidenav-toggled' : ''}`}>
-                <Navbar />
                 <Header toggleSidebar={toggleSidebar} />
 
                 {/* Компонент для обновления заголовка */}
@@ -48,7 +51,9 @@ const AppRouter = () => {
 
                 <Routes>
                     <Route path="/" element={<Main />} />
-                    <Route path="/about-page" element={<About />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="*" element={<NotFoundPage />} />
                 </Routes>
 
                 <div id="layoutSidenav">

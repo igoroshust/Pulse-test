@@ -7,7 +7,7 @@ const Footer = () => {
                 <div class="d-flex align-items-center justify-content-between small">
                     <div class="text-muted">Разработано &copy; ОПТ</div>
                         <div>
-                            <a href="#">Политика конфиденциальности</a>
+                            <a href="./privacy-policy">Политика конфиденциальности</a>
                             {/* Дополнительные документы */}
                             {/* &middot; */}
                             {/* <a href="#">Terms &amp; Conditions</a> */}
